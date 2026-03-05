@@ -1,7 +1,7 @@
 use crate::{
     cli::Args,
     color::{BLACK, WHITE},
-    into_binary::IntoBinary,
+    into_binary::IntoFlatBinary,
 };
 use clap::Parser;
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
@@ -10,7 +10,6 @@ use std::{path::PathBuf, str::FromStr};
 
 pub mod cli;
 pub mod color;
-pub mod flatten_into_vec_u32;
 pub mod into_binary;
 
 const BUFFER_WIDTH: usize = 160;
@@ -22,7 +21,7 @@ fn main() {
     // let args = Args::parse();
     let file_path = PathBuf::from_str("hello.png").unwrap();
     let mut image = image::open(file_path).unwrap();
-    println!("{:?}", image.binarize(BINARIZATION_THRESHOLD));
+    let flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
 
     let mut window = Window::new(
         "ESC to exit; E to pause; R to resume",
@@ -38,6 +37,13 @@ fn main() {
     window.set_target_fps(FPS);
 
     let mut screen_buffer = [0u32; BUFFER_WIDTH * BUFFER_HEIGHT];
+    screen_buffer.par_iter_mut().for_each(|pixel| {
+        if rand::random_bool(0.5) {
+            *pixel = WHITE;
+        } else {
+            *pixel = BLACK;
+        }
+    });
 
     let mut paused = false;
     while window.is_open() && !window.is_key_down(Key::Escape) {
@@ -51,13 +57,18 @@ fn main() {
             continue;
         }
 
-        screen_buffer.par_iter_mut().for_each(|pixel| {
-            if rand::random_bool(0.5) {
-                *pixel = WHITE;
-            } else {
-                *pixel = BLACK;
-            }
-        });
+        screen_buffer
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(i, pixel)| {
+                if !flat_binary[i] {
+                    if rand::random_bool(0.5) {
+                        *pixel = WHITE;
+                    } else {
+                        *pixel = BLACK;
+                    }
+                }
+            });
 
         window
             .update_with_buffer(&screen_buffer, BUFFER_WIDTH, BUFFER_HEIGHT)
