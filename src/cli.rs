@@ -10,11 +10,11 @@ use clap::Parser;
 ))]
 pub struct Args {
     #[arg(long)]
-    image: Option<PathBuf>,
+    pub image: Option<PathBuf>,
 
     #[arg(long)]
-    video: Option<PathBuf>,
+    pub video: Option<PathBuf>,
 
     #[arg(long)]
-    text: Option<String>,
+    pub text: Option<String>,
 }
