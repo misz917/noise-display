@@ -1,40 +1,22 @@
 use crate::{
     cli::Args,
     color::{BLACK, WHITE},
+    into_binary::IntoBinary,
 };
 use clap::Parser;
-use image::DynamicImage;
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 use rayon::prelude::*;
 use std::{path::PathBuf, str::FromStr};
 
 pub mod cli;
 pub mod color;
+pub mod flatten_into_vec_u32;
+pub mod into_binary;
 
 const BUFFER_WIDTH: usize = 160;
 const BUFFER_HEIGHT: usize = 90;
 const FPS: usize = 20;
 const BINARIZATION_THRESHOLD: u8 = 127;
-
-pub trait IntoBinary {
-    fn binarize(&mut self, threshold: u8) -> Result<(), ()>;
-}
-
-impl IntoBinary for DynamicImage {
-    fn binarize(&mut self, threshold: u8) -> Result<(), ()> {
-        let mut gray = self.to_luma8();
-        let _ = gray.iter_mut().par_bridge().for_each(|pixel| {
-            if *pixel > threshold {
-                *pixel = WHITE as u8;
-            } else {
-                *pixel = BLACK as u8;
-            }
-        });
-
-        *self = DynamicImage::ImageLuma8(gray);
-        Ok(())
-    }
-}
 
 fn main() {
     // let args = Args::parse();
@@ -73,7 +55,7 @@ fn main() {
             if rand::random_bool(0.5) {
                 *pixel = WHITE;
             } else {
-                *pixel = 0;
+                *pixel = BLACK;
             }
         });
 
