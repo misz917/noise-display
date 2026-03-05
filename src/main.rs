@@ -6,7 +6,6 @@ use crate::{
 use clap::Parser;
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 use rayon::prelude::*;
-use std::{path::PathBuf, str::FromStr};
 
 pub mod cli;
 pub mod color;
@@ -18,10 +17,21 @@ const FPS: usize = 20;
 const BINARIZATION_THRESHOLD: u8 = 127;
 
 fn main() {
-    // let args = Args::parse();
-    let file_path = PathBuf::from_str("hello.png").unwrap();
-    let mut image = image::open(file_path).unwrap();
-    let flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+    let args = Args::parse();
+
+    let mut flat_binary: Vec<bool> = vec![false; BUFFER_HEIGHT * BUFFER_WIDTH];
+    if let Some(image_path) = args.image {
+        let mut image = image::open(image_path).unwrap();
+        flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+    }
+
+    if let Some(video_path) = args.video {
+        unimplemented!()
+    }
+
+    if let Some(text_path) = args.text {
+        unimplemented!()
+    }
 
     let mut window = Window::new(
         "ESC to exit; E to pause; R to resume",
