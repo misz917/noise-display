@@ -4,5 +4,5 @@ pub mod black_white;
 pub mod rainbow;
 
 pub(crate) trait RandomisationStrategy {
-    fn randomise(buffer: &mut ScreenBuffer);
+    fn randomise(buffer: &mut ScreenBuffer, mask: Option<&[bool]>);
 }
