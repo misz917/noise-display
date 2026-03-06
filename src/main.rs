@@ -20,17 +20,18 @@ fn main() {
     let args = Args::parse();
 
     let mut flat_binary: Vec<bool> = vec![false; BUFFER_HEIGHT * BUFFER_WIDTH];
-    if let Some(image_path) = args.image {
-        let mut image = image::open(image_path).unwrap();
-        flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
-    }
-
-    if let Some(video_path) = args.video {
-        unimplemented!()
-    }
-
-    if let Some(text_path) = args.text {
-        unimplemented!()
+    if let Some(path) = args.path {
+        if let Some(extension) = path.extension() {
+            match extension.to_str().unwrap() {
+                "png" => {
+                    let mut image = image::open(path).unwrap();
+                    flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+                }
+                "mp4" => {}
+                "txt" => {}
+                _ => {}
+            }
+        }
     }
 
     let mut window = Window::new(
@@ -71,7 +72,7 @@ fn main() {
             .par_iter_mut()
             .enumerate()
             .for_each(|(i, pixel)| {
-                if !flat_binary[i] {
+                if !(args.negative ^ flat_binary[i]) {
                     if rand::random_bool(0.5) {
                         *pixel = WHITE;
                     } else {
