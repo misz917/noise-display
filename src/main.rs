@@ -1,12 +1,11 @@
 use crate::{
     cli::Args,
-    color::{BLACK, WHITE},
     into_binary::IntoFlatBinary,
+    randomisation_strategy::{RandomisationStrategy, rainbow::RainbowStrategy},
     screen_buffer::ScreenBuffer,
 };
 use clap::Parser;
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
-use rayon::prelude::*;
 
 pub mod cli;
 pub mod color;
@@ -50,15 +49,9 @@ fn main() {
 
     window.set_target_fps(FPS);
 
-    let mut screen_buffer = [0u32; BUFFER_WIDTH * BUFFER_HEIGHT];
-    screen_buffer.par_iter_mut().for_each(|pixel| {
-        *pixel = rand::random_range(0..=0xFFFFFF);
-        // if rand::random_bool(0.5) {
-        //     *pixel = WHITE;c
-        // } else {
-        //     *pixel = BLACK;
-        // }
-    });
+    let mut screen_buffer = ScreenBuffer::new(BUFFER_WIDTH, BUFFER_HEIGHT);
+
+    RainbowStrategy::randomise(&mut screen_buffer, None);
 
     let mut paused = false;
     while window.is_open() && !window.is_key_down(Key::Escape) {
@@ -72,22 +65,10 @@ fn main() {
             continue;
         }
 
-        screen_buffer
-            .par_iter_mut()
-            .enumerate()
-            .for_each(|(i, pixel)| {
-                if !(args.negative ^ flat_binary[i]) {
-                    *pixel = rand::random_range(0..=0xFFFFFF);
-                    // if rand::random_bool(0.5) {
-                    //     *pixel = WHITE;
-                    // } else {
-                    //     *pixel = BLACK;
-                    // }
-                }
-            });
+        RainbowStrategy::randomise(&mut screen_buffer, Some(&flat_binary));
 
         window
-            .update_with_buffer(&screen_buffer, BUFFER_WIDTH, BUFFER_HEIGHT)
+            .update_with_buffer(screen_buffer.get_buffer(), BUFFER_WIDTH, BUFFER_HEIGHT)
             .unwrap();
     }
 }
