@@ -21,13 +21,13 @@ const BINARIZATION_THRESHOLD: u8 = 127;
 fn main() {
     let args = Args::parse();
 
-    let mut flat_binary: Vec<bool> = vec![false; BUFFER_HEIGHT * BUFFER_WIDTH];
+    let mut mask: Vec<bool> = vec![false; BUFFER_HEIGHT * BUFFER_WIDTH];
     if let Some(path) = args.path {
         if let Some(extension) = path.extension() {
             match extension.to_str().unwrap() {
                 "png" => {
                     let mut image = image::open(path).unwrap();
-                    flat_binary = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+                    mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
                 }
                 "mp4" => {}
                 "txt" => {}
@@ -65,7 +65,7 @@ fn main() {
             continue;
         }
 
-        RainbowStrategy::randomise(&mut screen_buffer, Some(&flat_binary));
+        RainbowStrategy::randomise(&mut screen_buffer, Some(&mask));
 
         window
             .update_with_buffer(screen_buffer.get_buffer(), BUFFER_WIDTH, BUFFER_HEIGHT)
