@@ -2,6 +2,7 @@ use crate::{
     cli::Args,
     color::{BLACK, WHITE},
     into_binary::IntoFlatBinary,
+    screen_buffer::ScreenBuffer,
 };
 use clap::Parser;
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
@@ -10,6 +11,8 @@ use rayon::prelude::*;
 pub mod cli;
 pub mod color;
 pub mod into_binary;
+pub mod randomisation_strategy;
+pub mod screen_buffer;
 
 const BUFFER_WIDTH: usize = 160;
 const BUFFER_HEIGHT: usize = 90;
@@ -49,11 +52,12 @@ fn main() {
 
     let mut screen_buffer = [0u32; BUFFER_WIDTH * BUFFER_HEIGHT];
     screen_buffer.par_iter_mut().for_each(|pixel| {
-        if rand::random_bool(0.5) {
-            *pixel = WHITE;
-        } else {
-            *pixel = BLACK;
-        }
+        *pixel = rand::random_range(0..=0xFFFFFF);
+        // if rand::random_bool(0.5) {
+        //     *pixel = WHITE;c
+        // } else {
+        //     *pixel = BLACK;
+        // }
     });
 
     let mut paused = false;
@@ -73,11 +77,12 @@ fn main() {
             .enumerate()
             .for_each(|(i, pixel)| {
                 if !(args.negative ^ flat_binary[i]) {
-                    if rand::random_bool(0.5) {
-                        *pixel = WHITE;
-                    } else {
-                        *pixel = BLACK;
-                    }
+                    *pixel = rand::random_range(0..=0xFFFFFF);
+                    // if rand::random_bool(0.5) {
+                    //     *pixel = WHITE;
+                    // } else {
+                    //     *pixel = BLACK;
+                    // }
                 }
             });
 
