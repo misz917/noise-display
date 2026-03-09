@@ -51,7 +51,7 @@ fn main() {
 
     let mut screen_buffer = ScreenBuffer::new(BUFFER_WIDTH, BUFFER_HEIGHT);
 
-    RainbowStrategy::randomise(&mut screen_buffer, None);
+    RainbowStrategy.randomise(&mut screen_buffer, None);
 
     let mut paused = false;
     while window.is_open() && !window.is_key_down(Key::Escape) {
@@ -65,7 +65,7 @@ fn main() {
             continue;
         }
 
-        RainbowStrategy::randomise(&mut screen_buffer, Some(&mask));
+        RainbowStrategy.randomise(&mut screen_buffer, Some(&mask));
 
         window
             .update_with_buffer(screen_buffer.get_buffer(), BUFFER_WIDTH, BUFFER_HEIGHT)
