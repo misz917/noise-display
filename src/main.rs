@@ -9,6 +9,7 @@ use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 
 pub mod cli;
 pub mod color;
+pub mod display;
 pub mod into_binary;
 pub mod randomisation_strategy;
 pub mod screen_buffer;
