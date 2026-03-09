@@ -5,7 +5,7 @@ pub struct RainbowStrategy;
 
 impl RandomisationStrategy for RainbowStrategy {
     /// mask: if true => change the pixel; if false => leave unchanged
-    fn randomise(buffer: &mut ScreenBuffer, mask: Option<&[bool]>) {
+    fn randomise(&self, buffer: &mut ScreenBuffer, mask: Option<&[bool]>) {
         let mask = match mask {
             Some(mask) => mask,
             None => &vec![true; buffer.height() * buffer.width()],
