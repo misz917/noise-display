@@ -9,3 +9,4 @@ image = "0.25.9"
 minifb = "0.28.0"
 rand = "0.10.0"
 rayon = "1.11.0"
+tokio = { version = "1.50.0", features = ["full"] }
