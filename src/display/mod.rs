@@ -1,6 +1,7 @@
-use minifb::Window;
+use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 
 use crate::{
+    FPS,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
 };
@@ -9,15 +10,31 @@ pub struct Display {
     screen_buffer: ScreenBuffer,
     noise_strategy: Box<dyn RandomisationStrategy>,
     mask: Option<Box<[bool]>>,
-    // window: Window;
+    window: Window,
 }
 
 impl Display {
     pub fn new(screen_buffer: ScreenBuffer) -> Self {
+        let width = screen_buffer.width();
+        let height = screen_buffer.height();
+
+        let mut window = Window::new(
+            "ESC to exit; E to pause; R to resume",
+            width,
+            height,
+            WindowOptions {
+                scale: Scale::X8,
+                ..WindowOptions::default()
+            },
+        )
+        .unwrap();
+        window.set_target_fps(FPS);
+
         Self {
             screen_buffer,
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
+            window,
         }
     }
 
@@ -30,42 +47,38 @@ impl Display {
     pub fn set_mask(&mut self, mask: Box<[bool]>) {
         self.mask = Some(mask);
     }
-}
 
-/*
-    let mut window = Window::new(
-        "ESC to exit; E to pause; R to resume",
-        BUFFER_WIDTH,
-        BUFFER_HEIGHT,
-        WindowOptions {
-            scale: Scale::X8,
-            ..WindowOptions::default()
-        },
-    )
-    .unwrap();
+    pub fn run(&mut self) {
+        assert!({
+            if let Some(mask) = &self.mask {
+                self.screen_buffer.width() * self.screen_buffer.height() == mask.iter().len()
+            } else {
+                true
+            }
+        });
 
-    window.set_target_fps(FPS);
+        let mut paused = false;
+        while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
+            if self.window.is_key_pressed(Key::E, KeyRepeat::No) {
+                paused = true;
+            } else if self.window.is_key_pressed(Key::R, KeyRepeat::No) {
+                paused = false;
+            }
+            if paused {
+                self.window.update();
+                continue;
+            }
 
-    let mut screen_buffer = ScreenBuffer::new(BUFFER_WIDTH, BUFFER_HEIGHT);
+            self.noise_strategy
+                .randomise(&mut self.screen_buffer, self.mask.as_deref());
 
-    RainbowStrategy::randomise(&mut screen_buffer, None);
-
-    let mut paused = false;
-    while window.is_open() && !window.is_key_down(Key::Escape) {
-        if window.is_key_pressed(Key::E, KeyRepeat::No) {
-            paused = true;
-        } else if window.is_key_pressed(Key::R, KeyRepeat::No) {
-            paused = false;
+            self.window
+                .update_with_buffer(
+                    self.screen_buffer.get_buffer(),
+                    self.screen_buffer.width(),
+                    self.screen_buffer.height(),
+                )
+                .unwrap();
         }
-        if paused {
-            window.update();
-            continue;
-        }
-
-        RainbowStrategy::randomise(&mut screen_buffer, Some(&mask));
-
-        window
-            .update_with_buffer(screen_buffer.get_buffer(), BUFFER_WIDTH, BUFFER_HEIGHT)
-            .unwrap();
     }
-*/
+}
