@@ -1,5 +1,6 @@
 use crate::{
-    cli::Args, display::Display, into_binary::IntoFlatBinary, screen_buffer::ScreenBuffer,
+    cli::Args, display::Display, into_binary::IntoFlatBinary,
+    randomisation_strategy::black_white::BlackWhiteStrategy, screen_buffer::ScreenBuffer,
 };
 use clap::Parser;
 
@@ -35,6 +36,7 @@ fn main() {
 
     let screen_buffer = ScreenBuffer::new(BUFFER_WIDTH, BUFFER_HEIGHT);
     let mut display = Display::new(screen_buffer);
+    display.set_noise_strategy(Box::new(BlackWhiteStrategy));
     display.set_mask(mask.into());
     display.run();
 }
