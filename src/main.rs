@@ -28,7 +28,6 @@ fn main() {
                     mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
                 }
                 "mp4" => {}
-                "txt" => {}
                 _ => {}
             }
         }
