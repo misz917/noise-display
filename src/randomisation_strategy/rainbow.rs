@@ -11,7 +11,7 @@ impl RandomisationStrategy for RainbowStrategy {
             .par_iter_mut()
             .enumerate()
             .for_each(|(i, pixel)| {
-                if mask.is_some() && mask.unwrap()[i] {
+                if mask.is_none() || !mask.unwrap()[i] {
                     *pixel = rand::random_range(0..=0xFFFFFF);
                 }
             });

@@ -15,7 +15,7 @@ impl RandomisationStrategy for BlackWhiteStrategy {
             .par_iter_mut()
             .enumerate()
             .for_each(|(i, pixel)| {
-                if mask.is_some() && mask.unwrap()[i] {
+                if mask.is_none() || !mask.unwrap()[i] {
                     if rand::random_bool(0.5) {
                         *pixel = BLACK;
                     } else {
