@@ -48,6 +48,10 @@ impl Display {
         self.mask = Some(mask);
     }
 
+    fn init(&mut self) {
+        self.noise_strategy.randomise(&mut self.screen_buffer, None);
+    }
+
     pub fn run(&mut self) {
         assert!({
             if let Some(mask) = &self.mask {
@@ -56,6 +60,8 @@ impl Display {
                 true
             }
         });
+
+        self.init();
 
         let mut paused = false;
         while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
