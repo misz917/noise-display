@@ -56,7 +56,7 @@ impl Display {
     }
 
     fn init(&mut self) {
-        self.noise_strategy.randomise(&mut self.screen_buffer, None);
+        self.noise_strategy.init(&mut self.screen_buffer);
     }
 
     fn load_images_into_memory(&mut self, path: &Path) {
