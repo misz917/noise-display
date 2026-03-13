@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct ScreenBuffer {
     buffer: Vec<u32>,
     width: usize,

@@ -5,6 +5,7 @@ use crate::{
     extract_frames::extract_frames_with_ffmpeg,
     randomisation_strategy::{
         RandomisationStrategy, black_white::BlackWhiteStrategy, rainbow::RainbowStrategy,
+        slide::SlideStrategy,
     },
 };
 use clap::Parser;
@@ -26,6 +27,7 @@ impl Cli {
                 let strat: Box<dyn RandomisationStrategy> = match args.strat.as_deref() {
                     Some("bw") | Some("blackwhite") => Box::new(BlackWhiteStrategy),
                     Some("r") | Some("rainbow") => Box::new(RainbowStrategy),
+                    Some("s") | Some("slide") => Box::new(SlideStrategy),
                     _ => Box::new(BlackWhiteStrategy),
                 };
 

@@ -24,4 +24,8 @@ impl RandomisationStrategy for BlackWhiteStrategy {
                 }
             });
     }
+
+    fn init(&self, buffer: &mut ScreenBuffer) {
+        self.randomise(buffer, None);
+    }
 }

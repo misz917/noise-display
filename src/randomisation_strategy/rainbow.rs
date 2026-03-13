@@ -16,4 +16,8 @@ impl RandomisationStrategy for RainbowStrategy {
                 }
             });
     }
+
+    fn init(&self, buffer: &mut ScreenBuffer) {
+        self.randomise(buffer, None);
+    }
 }
