@@ -56,14 +56,17 @@ impl Display {
         self.noise_strategy.randomise(&mut self.screen_buffer, None);
     }
 
-    fn load_images_into_memory(&mut self, dir: &Path) {
-        assert!(dir.is_dir());
-
-        let paths = fs::read_dir(dir).unwrap();
-        for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-            let image = image::open(dir.join(file_name)).unwrap();
+    fn load_images_into_memory(&mut self, path: &Path) {
+        if path.is_dir() {
+            let paths = fs::read_dir(path).unwrap();
+            for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
+                let image = image::open(path.join(file_name)).unwrap();
+                self.memory.push_back(image);
+                print!("\r{}", i);
+            }
+        } else {
+            let image = image::open(path).unwrap();
             self.memory.push_back(image);
-            print!("\r{}", i);
         }
     }
 
@@ -83,8 +86,6 @@ impl Display {
     }
 
     pub fn run(&mut self, path: &Path) {
-        assert!(path.is_dir());
-
         self.load_images_into_memory(path);
         self.scale_images_in_memory();
 
