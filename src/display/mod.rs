@@ -1,5 +1,5 @@
 use crate::{
-    BINARIZATION_THRESHOLD, BUFFER_HEIGHT, BUFFER_WIDTH, FPS,
+    BINARIZATION_THRESHOLD, FPS,
     into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
@@ -7,6 +7,9 @@ use crate::{
 use image::{DynamicImage, imageops::FilterType};
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 use std::{collections::LinkedList, fs, path::Path};
+
+const DEFAULT_WIDTH: usize = 160;
+const DEFAULT_HEIGHT: usize = 90;
 
 pub struct Display {
     screen_buffer: ScreenBuffer,
@@ -18,8 +21,8 @@ pub struct Display {
 
 impl Display {
     pub fn new() -> Self {
-        let width = BUFFER_WIDTH;
-        let height = BUFFER_HEIGHT;
+        let width = DEFAULT_WIDTH;
+        let height = DEFAULT_HEIGHT;
 
         let mut window = Window::new(
             "ESC to exit; E to pause; R to resume",
