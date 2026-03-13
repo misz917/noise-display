@@ -1,5 +1,5 @@
 use crate::{
-    BINARIZATION_THRESHOLD, FPS,
+    BINARIZATION_THRESHOLD, BUFFER_HEIGHT, BUFFER_WIDTH, FPS,
     into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
@@ -17,9 +17,9 @@ pub struct Display {
 }
 
 impl Display {
-    pub fn new(screen_buffer: ScreenBuffer) -> Self {
-        let width = screen_buffer.width();
-        let height = screen_buffer.height();
+    pub fn new() -> Self {
+        let width = BUFFER_WIDTH;
+        let height = BUFFER_HEIGHT;
 
         let mut window = Window::new(
             "ESC to exit; E to pause; R to resume",
@@ -34,7 +34,7 @@ impl Display {
         window.set_target_fps(FPS);
 
         Self {
-            screen_buffer,
+            screen_buffer: ScreenBuffer::new(width, height),
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
             window,
