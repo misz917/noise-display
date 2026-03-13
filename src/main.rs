@@ -38,7 +38,7 @@ fn main() {
                         .unwrap();
 
                     display.run(&PathBuf::from_str(TEMP_FILE_PATH).unwrap());
-                    fs::remove_dir(TEMP_FILE_PATH).unwrap();
+                    fs::remove_dir_all(TEMP_FILE_PATH).unwrap();
                 }
                 _ => {}
             }
