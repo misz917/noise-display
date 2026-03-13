@@ -1,16 +1,19 @@
-use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
-
 use crate::{
-    FPS,
+    BINARIZATION_THRESHOLD, FPS,
+    into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
 };
+use image::{DynamicImage, imageops::FilterType};
+use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
+use std::{collections::LinkedList, fs, path::Path};
 
 pub struct Display {
     screen_buffer: ScreenBuffer,
     noise_strategy: Box<dyn RandomisationStrategy>,
     mask: Option<Box<[bool]>>,
     window: Window,
+    memory: LinkedList<DynamicImage>,
 }
 
 impl Display {
@@ -35,6 +38,7 @@ impl Display {
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
             window,
+            memory: LinkedList::new(),
         }
     }
 
@@ -52,14 +56,37 @@ impl Display {
         self.noise_strategy.randomise(&mut self.screen_buffer, None);
     }
 
-    pub fn run(&mut self) {
-        assert!({
-            if let Some(mask) = &self.mask {
-                self.screen_buffer.width() * self.screen_buffer.height() == mask.iter().len()
-            } else {
-                true
-            }
-        });
+    fn load_images_into_memory(&mut self, dir: &Path) {
+        assert!(dir.is_dir());
+
+        let paths = fs::read_dir(dir).unwrap();
+        for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
+            let image = image::open(dir.join(file_name)).unwrap();
+            self.memory.push_back(image);
+            print!("\r{}", i);
+        }
+    }
+
+    fn scale_images_in_memory(&mut self) {
+        let width = self.screen_buffer.width() as u32;
+        let height = self.screen_buffer.height() as u32;
+
+        let mut list: LinkedList<DynamicImage> = LinkedList::new();
+
+        for (i, image) in self.memory.iter().enumerate() {
+            let scaled = image.resize_exact(width, height, FilterType::Nearest);
+            list.push_back(scaled);
+            print!("\r{}", i);
+        }
+
+        self.memory = list;
+    }
+
+    pub fn run(&mut self, path: &Path) {
+        assert!(path.is_dir());
+
+        self.load_images_into_memory(path);
+        self.scale_images_in_memory();
 
         self.init();
 
@@ -73,6 +100,12 @@ impl Display {
             if paused {
                 self.window.update();
                 continue;
+            }
+
+            let image = self.memory.pop_front();
+            if let Some(image) = image {
+                let mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+                self.set_mask(mask.into());
             }
 
             self.noise_strategy
