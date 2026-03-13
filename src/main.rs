@@ -1,3 +1,5 @@
+use std::{path::PathBuf, str::FromStr};
+
 use crate::{
     cli::Args, display::Display, into_binary::IntoFlatBinary,
     randomisation_strategy::black_white::BlackWhiteStrategy, screen_buffer::ScreenBuffer,
@@ -7,6 +9,7 @@ use clap::Parser;
 pub mod cli;
 pub mod color;
 pub mod display;
+pub mod extract_frames;
 pub mod into_binary;
 pub mod randomisation_strategy;
 pub mod screen_buffer;
@@ -37,5 +40,5 @@ fn main() {
     let mut display = Display::new(screen_buffer);
     display.set_noise_strategy(Box::new(BlackWhiteStrategy));
     display.set_mask(mask.into());
-    display.run();
+    display.run(&PathBuf::from_str("/home/mil/Code/noise-display/tmp/bad_apple").unwrap());
 }
