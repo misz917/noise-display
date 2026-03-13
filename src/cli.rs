@@ -5,4 +5,5 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 pub struct Args {
     pub path: Option<PathBuf>,
+    pub strat: Option<String>,
 }

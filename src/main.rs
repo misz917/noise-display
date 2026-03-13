@@ -1,6 +1,11 @@
 use crate::{
-    cli::Args, display::Display, extract_frames::extract_frames_with_ffmpeg,
-    randomisation_strategy::black_white::BlackWhiteStrategy, screen_buffer::ScreenBuffer,
+    cli::Args,
+    display::Display,
+    extract_frames::extract_frames_with_ffmpeg,
+    randomisation_strategy::{
+        RandomisationStrategy, black_white::BlackWhiteStrategy, rainbow::RainbowStrategy,
+    },
+    screen_buffer::ScreenBuffer,
 };
 use clap::Parser;
 use std::{fs, path::PathBuf, str::FromStr};
@@ -27,6 +32,14 @@ fn main() {
             let screen_buffer = ScreenBuffer::new(BUFFER_WIDTH, BUFFER_HEIGHT);
             let mut display = Display::new(screen_buffer);
             display.set_noise_strategy(Box::new(BlackWhiteStrategy));
+
+            let strat: Box<dyn RandomisationStrategy> = match args.strat.as_deref() {
+                Some("bw") | Some("blackwhite") => Box::new(BlackWhiteStrategy),
+                Some("r") | Some("rainbow") => Box::new(RainbowStrategy),
+                _ => Box::new(BlackWhiteStrategy),
+            };
+
+            display.set_noise_strategy(strat);
 
             match extension.to_str().unwrap() {
                 "jpg" => {
