@@ -8,8 +8,12 @@ use image::{DynamicImage, imageops::FilterType};
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
 use std::{collections::LinkedList, fs, path::Path};
 
-const DEFAULT_WIDTH: usize = 160;
-const DEFAULT_HEIGHT: usize = 90;
+const SCALE: usize = 20;
+
+const BASE_DIMENSIONS: (usize, usize) = (16, 9);
+
+const DEFAULT_WIDTH: usize = BASE_DIMENSIONS.0 * SCALE;
+const DEFAULT_HEIGHT: usize = BASE_DIMENSIONS.1 * SCALE;
 
 pub struct Display {
     screen_buffer: ScreenBuffer,
@@ -29,7 +33,7 @@ impl Display {
             width,
             height,
             WindowOptions {
-                scale: Scale::X8,
+                scale: Scale::X4,
                 ..WindowOptions::default()
             },
         )
