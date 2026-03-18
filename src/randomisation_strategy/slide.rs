@@ -20,8 +20,15 @@ impl RandomisationStrategy for SlideStrategy {
             .for_each(|(i, pixel)| {
                 if !(mask.is_none() || !mask.unwrap()[i]) {
                     if !(i % width == width - 1) {
-                        // here
-                        *pixel = c_buffer[i + 1]
+                        if mask.unwrap()[i + 1] {
+                            *pixel = c_buffer[i + 1]
+                        } else {
+                            if rand::random_bool(0.5) {
+                                *pixel = BLACK;
+                            } else {
+                                *pixel = WHITE;
+                            }
+                        }
                     } else {
                         if rand::random_bool(0.5) {
                             *pixel = BLACK;
