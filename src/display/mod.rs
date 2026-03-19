@@ -2,7 +2,7 @@ use crate::{
     BINARIZATION_THRESHOLD, FPS,
     into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
-    screen_buffer::ScreenBuffer,
+    screen_buffer::{self, ScreenBuffer},
 };
 use image::{DynamicImage, imageops::FilterType};
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
@@ -16,36 +16,21 @@ const DEFAULT_WIDTH: usize = BASE_DIMENSIONS.0 * SCALE;
 const DEFAULT_HEIGHT: usize = BASE_DIMENSIONS.1 * SCALE;
 
 pub struct Display {
-    screen_buffer: ScreenBuffer,
+    screen_buffer: Option<ScreenBuffer>,
     noise_strategy: Box<dyn RandomisationStrategy>,
     mask: Option<Box<[bool]>>,
-    window: Window,
+    window: Option<Window>,
     memory: LinkedList<DynamicImage>,
 }
 
 impl Display {
     pub fn new() -> Self {
-        let width = DEFAULT_WIDTH;
-        let height = DEFAULT_HEIGHT;
-
-        let mut window = Window::new(
-            "ESC to exit; E to pause; R to resume",
-            width,
-            height,
-            WindowOptions {
-                scale: Scale::X4,
-                ..WindowOptions::default()
-            },
-        )
-        .unwrap();
-        window.set_target_fps(FPS);
-
         Self {
-            screen_buffer: ScreenBuffer::new(width, height),
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
-            window,
             memory: LinkedList::new(),
+            screen_buffer: None,
+            window: None,
         }
     }
 
@@ -60,7 +45,8 @@ impl Display {
     }
 
     fn init(&mut self) {
-        self.noise_strategy.init(&mut self.screen_buffer);
+        self.noise_strategy
+            .init(self.screen_buffer.as_mut().unwrap());
     }
 
     fn load_images_into_memory(&mut self, path: &Path) {
@@ -77,55 +63,73 @@ impl Display {
         }
     }
 
-    fn scale_images_in_memory(&mut self) {
-        let width = self.screen_buffer.width() as u32;
-        let height = self.screen_buffer.height() as u32;
-
-        let mut list: LinkedList<DynamicImage> = LinkedList::new();
-
-        for (i, image) in self.memory.iter().enumerate() {
-            let scaled = image.resize_exact(width, height, FilterType::Nearest);
-            list.push_back(scaled);
-            print!("\r{}", i);
+    fn initialize_screen_buffer(&mut self) -> bool {
+        if let Some(front) = self.memory.front() {
+            let width = front.width();
+            let height = front.height();
+            let buffer = ScreenBuffer::new(width as usize, height as usize);
+            self.screen_buffer = Some(buffer);
+            return true;
         }
+        return false;
+    }
 
-        self.memory = list;
+    fn initialize_window(&mut self) {
+        if let Some(screen_buffer) = &self.screen_buffer {
+            let width = screen_buffer.width();
+            let height = screen_buffer.height();
+
+            let mut window = Window::new(
+                "ESC to exit; E to pause; R to resume",
+                width,
+                height,
+                WindowOptions {
+                    scale: Scale::X4,
+                    ..WindowOptions::default()
+                },
+            )
+            .unwrap();
+            window.set_target_fps(FPS);
+        }
     }
 
     pub fn run(&mut self, path: &Path) {
         self.load_images_into_memory(path);
-        self.scale_images_in_memory();
 
         self.init();
 
-        let mut paused = false;
-        while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
-            if self.window.is_key_pressed(Key::E, KeyRepeat::No) {
-                paused = true;
-            } else if self.window.is_key_pressed(Key::R, KeyRepeat::No) {
-                paused = false;
-            }
-            if paused {
-                self.window.update();
-                continue;
-            }
+        if let Some(window) = self.window.as_mut() {
+            let mut paused = false;
+            // if let Some(mut screen_buffer) = self.screen_buffer.as_mut() {
+            while window.is_open() && !window.is_key_down(Key::Escape) {
+                if window.is_key_pressed(Key::E, KeyRepeat::No) {
+                    paused = true;
+                } else if window.is_key_pressed(Key::R, KeyRepeat::No) {
+                    paused = false;
+                }
+                if paused {
+                    window.update();
+                    continue;
+                }
 
-            let image = self.memory.pop_front();
-            if let Some(image) = image {
-                let mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
-                self.set_mask(mask.into());
+                let image = self.memory.pop_front();
+                if let Some(image) = image {
+                    let mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
+                    self.set_mask(mask.into());
+                }
+
+                self.noise_strategy
+                    .randomise(&mut screen_buffer, self.mask.as_deref());
+
+                window
+                    .update_with_buffer(
+                        self.screen_buffer.as_mut().unwrap().get_buffer(),
+                        self.screen_buffer.as_mut().unwrap().width(),
+                        self.screen_buffer.as_mut().unwrap().height(),
+                    )
+                    .unwrap();
             }
-
-            self.noise_strategy
-                .randomise(&mut self.screen_buffer, self.mask.as_deref());
-
-            self.window
-                .update_with_buffer(
-                    self.screen_buffer.get_buffer(),
-                    self.screen_buffer.width(),
-                    self.screen_buffer.height(),
-                )
-                .unwrap();
+            // }
         }
     }
 }
