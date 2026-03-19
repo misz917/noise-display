@@ -6,7 +6,7 @@ use crate::{
 };
 use image::{DynamicImage, imageops::FilterType};
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
-use std::{collections::LinkedList, fs, path::Path};
+use std::{collections::VecDeque, fs, path::Path};
 
 const SCALE: usize = 20;
 
@@ -20,7 +20,7 @@ pub struct Display {
     noise_strategy: Box<dyn RandomisationStrategy>,
     mask: Option<Box<[bool]>>,
     window: Window,
-    memory: LinkedList<DynamicImage>,
+    memory: VecDeque<DynamicImage>,
 }
 
 impl Display {
@@ -45,7 +45,7 @@ impl Display {
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
             window,
-            memory: LinkedList::new(),
+            memory: VecDeque::new(),
         }
     }
 
@@ -81,7 +81,7 @@ impl Display {
         let width = self.screen_buffer.width() as u32;
         let height = self.screen_buffer.height() as u32;
 
-        let mut list: LinkedList<DynamicImage> = LinkedList::new();
+        let mut list: VecDeque<DynamicImage> = VecDeque::new();
 
         for (i, image) in self.memory.iter().enumerate() {
             let scaled = image.resize_exact(width, height, FilterType::Nearest);
