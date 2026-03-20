@@ -1,5 +1,6 @@
 use crate::{
     BINARIZATION_THRESHOLD, FPS,
+    image_source::ImageSource,
     into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
@@ -21,6 +22,7 @@ pub struct Display {
     mask: Option<Box<[bool]>>,
     window: Window,
     memory: VecDeque<DynamicImage>,
+    image_source: Box<dyn ImageSource>,
 }
 
 impl Display {
