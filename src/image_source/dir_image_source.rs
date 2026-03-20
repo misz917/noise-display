@@ -2,11 +2,11 @@ use crate::image_source::ImageSource;
 use image::DynamicImage;
 use std::{collections::LinkedList, fs, path::Path};
 
-pub struct BasicImageSource {
+pub struct DirImageSource {
     memory: LinkedList<DynamicImage>,
 }
 
-impl ImageSource for BasicImageSource {
+impl ImageSource for DirImageSource {
     fn new(path: &Path) -> Self {
         assert!(path.is_dir());
 
