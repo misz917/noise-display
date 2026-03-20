@@ -4,6 +4,7 @@ pub mod cli;
 pub mod color;
 pub mod display;
 pub mod extract_frames;
+pub mod image_source;
 pub mod into_binary;
 pub mod randomisation_strategy;
 pub mod screen_buffer;
