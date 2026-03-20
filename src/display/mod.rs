@@ -1,28 +1,26 @@
 use crate::{
     BINARIZATION_THRESHOLD, FPS,
-    image_source::ImageSource,
+    image_source::{ImageSource, single_image_source::SingleImageSource},
     into_binary::IntoFlatBinary,
     randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
 };
-use image::{DynamicImage, imageops::FilterType};
 use minifb::{Key, KeyRepeat, Scale, Window, WindowOptions};
-use std::{collections::VecDeque, fs, path::Path};
+use std::path::Path;
 
 const SCALE: usize = 20;
 
 const BASE_DIMENSIONS: (usize, usize) = (16, 9);
 
-const DEFAULT_WIDTH: usize = BASE_DIMENSIONS.0 * SCALE;
-const DEFAULT_HEIGHT: usize = BASE_DIMENSIONS.1 * SCALE;
+pub const DEFAULT_WIDTH: usize = BASE_DIMENSIONS.0 * SCALE;
+pub const DEFAULT_HEIGHT: usize = BASE_DIMENSIONS.1 * SCALE;
 
 pub struct Display {
     screen_buffer: ScreenBuffer,
     noise_strategy: Box<dyn RandomisationStrategy>,
     mask: Option<Box<[bool]>>,
     window: Window,
-    memory: VecDeque<DynamicImage>,
-    image_source: Box<dyn ImageSource>,
+    image_source: Option<Box<dyn ImageSource>>,
 }
 
 impl Display {
@@ -47,7 +45,7 @@ impl Display {
             noise_strategy: Box::new(BlackWhiteStrategy),
             mask: None,
             window,
-            memory: VecDeque::new(),
+            image_source: None,
         }
     }
 
@@ -65,38 +63,8 @@ impl Display {
         self.noise_strategy.init(&mut self.screen_buffer);
     }
 
-    fn load_images_into_memory(&mut self, path: &Path) {
-        if path.is_dir() {
-            let paths = fs::read_dir(path).unwrap();
-            for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-                let image = image::open(path.join(file_name)).unwrap();
-                self.memory.push_back(image);
-                print!("\r{}", i);
-            }
-        } else {
-            let image = image::open(path).unwrap();
-            self.memory.push_back(image);
-        }
-    }
-
-    fn scale_images_in_memory(&mut self) {
-        let width = self.screen_buffer.width() as u32;
-        let height = self.screen_buffer.height() as u32;
-
-        let mut list: VecDeque<DynamicImage> = VecDeque::new();
-
-        for (i, image) in self.memory.iter().enumerate() {
-            let scaled = image.resize_exact(width, height, FilterType::Nearest);
-            list.push_back(scaled);
-            print!("\r{}", i);
-        }
-
-        self.memory = list;
-    }
-
     pub fn run(&mut self, path: &Path) {
-        self.load_images_into_memory(path);
-        self.scale_images_in_memory();
+        self.image_source = Some(Box::new(SingleImageSource::new(path)));
 
         self.init();
 
@@ -112,7 +80,7 @@ impl Display {
                 continue;
             }
 
-            let image = self.memory.pop_front();
+            let image = self.image_source.as_mut().unwrap().next();
             if let Some(image) = image {
                 let mask = image.binarize_and_flatten(BINARIZATION_THRESHOLD);
                 self.set_mask(mask.into());
