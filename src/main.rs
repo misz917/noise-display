@@ -9,6 +9,8 @@ pub mod into_binary;
 pub mod randomisation_strategy;
 pub mod screen_buffer;
 
+pub mod noise_display;
+
 const FPS: usize = 30;
 const BINARIZATION_THRESHOLD: u8 = 127;
 const TEMP_FILE_PATH: &str = "./temp/";
