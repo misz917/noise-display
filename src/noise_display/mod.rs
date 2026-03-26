@@ -13,6 +13,8 @@ impl NoiseDisplayInterface for NoiseDisplay {
     }
 
     fn display(&mut self, mut image_source: Box<dyn ImageSource>) {
-        let image = image_source.next();
+        if let Some(image) = image_source.next() {
+            //
+        }
     }
 }
