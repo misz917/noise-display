@@ -17,12 +17,13 @@ pub mod screen_buffer;
 pub mod noise_display;
 
 const FPS: usize = 30;
+const DEFAULT_TARGET_FPS: usize = 30;
 const BINARIZATION_THRESHOLD: u8 = 127;
 const TEMP_FILE_PATH: &str = "./temp/";
 
 fn main() {
     // Cli::run();
-    let mut noise_display = NoiseDisplay::new();
+    let mut noise_display = NoiseDisplay::default();
     let image_source = SingleImageSource::new(
         &PathBuf::from_str("/home/mil/Code/noise-display/apple.jpg").unwrap(),
     );
