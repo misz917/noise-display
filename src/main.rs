@@ -1,6 +1,6 @@
 use crate::{
     cli::Cli,
-    image_source::{ImageSource, single_image_source::SingleImageSource},
+    image_source::image_source_factory::ImageSourceFactory,
     noise_display::{NoiseDisplay, interface::NoiseDisplayInterface},
 };
 use std::{path::PathBuf, str::FromStr};
@@ -24,8 +24,7 @@ const TEMP_FILE_PATH: &str = "./temp/";
 fn main() {
     // Cli::run();
     let mut noise_display = NoiseDisplay::default();
-    let image_source = SingleImageSource::new(
-        &PathBuf::from_str("/home/mil/Code/noise-display/apple.jpg").unwrap(),
-    );
-    noise_display.display(Box::new(image_source));
+    let path = PathBuf::from_str("/home/mil/Code/noise-display/bad_apple.mp4").unwrap();
+    let image_source = ImageSourceFactory::new_image_source(&path);
+    noise_display.display(image_source);
 }

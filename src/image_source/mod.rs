@@ -2,6 +2,7 @@ use image::DynamicImage;
 use std::path::Path;
 
 pub mod dir_image_source;
+pub mod image_source_factory;
 pub mod single_image_source;
 
 pub trait ImageSource {
