@@ -1,5 +1,5 @@
 use crate::{
-    BINARIZATION_THRESHOLD, DEFAULT_TARGET_FPS,
+    DEFAULT_TARGET_FPS,
     image_source::ImageSource,
     into_binary::IntoFlatBinary,
     noise_display::interface::NoiseDisplayInterface,
@@ -42,14 +42,20 @@ impl NoiseDisplayInterface for NoiseDisplay {
         let width = image.width() as usize;
         let height = image.height() as usize;
 
-        let window = self.init_window(width, height, self.target_fps).unwrap();
-        let mut scren_buffer = ScreenBuffer::new(width, height);
+        let mut window = self.init_window(width, height, self.target_fps).unwrap();
+        let mut screen_buffer = ScreenBuffer::new(width, height);
 
         let mut mask = image.binarize_and_flatten(self.binarization_threshold);
 
+        self.noise_strategy.init(&mut screen_buffer);
+
         while window.is_open() && !window.is_key_down(Key::Escape) {
             self.noise_strategy
-                .randomise(&mut scren_buffer, Some(&mask));
+                .randomise(&mut screen_buffer, Some(&mask));
+
+            window
+                .update_with_buffer(screen_buffer.get_buffer(), width, height)
+                .unwrap();
 
             if let Some(new_image) = image_source.next() {
                 image = new_image;
