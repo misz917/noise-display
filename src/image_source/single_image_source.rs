@@ -1,7 +1,4 @@
-use crate::{
-    display::{DEFAULT_HEIGHT, DEFAULT_WIDTH},
-    image_source::ImageSource,
-};
+use crate::{DEFAULT_HEIGHT, DEFAULT_WIDTH, image_source::ImageSource};
 use image::{DynamicImage, imageops::FilterType};
 
 pub struct SingleImageSource {

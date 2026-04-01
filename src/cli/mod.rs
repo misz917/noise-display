@@ -1,20 +1,40 @@
 use crate::{
-    TEMP_FILE_PATH,
+    BINARIZATION_THRESHOLD, DEFAULT_TARGET_FPS,
     cli::args::Args,
-    display::Display,
-    extract_frames::extract_frames_with_ffmpeg,
+    image_source::image_source_factory::ImageSourceFactory,
+    noise_display::{NoiseDisplay, interface::NoiseDisplayInterface},
     randomisation_strategy::{
         RandomisationStrategy, black_white::BlackWhiteStrategy, rainbow::RainbowStrategy,
         slide::SlideStrategy,
     },
 };
 use clap::Parser;
-use std::{fs, path::PathBuf, str::FromStr};
 
 pub mod args;
 
-pub struct Cli {}
+pub struct Cli;
 
+impl Cli {
+    pub fn new_run() -> Result<(), Box<dyn std::error::Error>> {
+        let args = Args::parse();
+
+        let path = args.path.ok_or("Path not provided")?;
+        let strategy: Box<dyn RandomisationStrategy> = match args.strat.as_deref() {
+            Some("bw") => Box::new(BlackWhiteStrategy),
+            Some("r") => Box::new(RainbowStrategy),
+            Some("s") => Box::new(SlideStrategy),
+            _ => Box::new(BlackWhiteStrategy),
+        };
+
+        let image_source = ImageSourceFactory::new_image_source(&path);
+        let mut display = NoiseDisplay::new(DEFAULT_TARGET_FPS, strategy, BINARIZATION_THRESHOLD);
+        display.display(image_source);
+
+        Ok(())
+    }
+}
+
+/*
 impl Cli {
     pub fn run() {
         let args = Args::parse();
@@ -54,3 +74,4 @@ impl Cli {
         }
     }
 }
+*/
