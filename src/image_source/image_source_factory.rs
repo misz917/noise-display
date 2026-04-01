@@ -11,7 +11,7 @@ impl ImageSourceFactory {
         let image_source: Box<dyn ImageSource> = match extension {
             "jpg" => Box::new(SingleImageSource::new(path)),
             "mp4" => Box::new(DirImageSource::new(path)),
-            _ => panic!(),
+            _ => unimplemented!(),
         };
 
         image_source
