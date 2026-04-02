@@ -19,7 +19,6 @@ pub const DEFAULT_HEIGHT: usize = BASE_DIMENSIONS.1 * SCALE;
 
 const DEFAULT_TARGET_FPS: usize = 30;
 const BINARIZATION_THRESHOLD: u8 = 127;
-const TEMP_FILE_PATH: &str = "./temp/";
 
 fn main() {
     Cli::new_run().unwrap();
