@@ -1,16 +1,11 @@
-use crate::image_source::mp4_source::Mp4SourceError;
+use crate::image_source::error::ImageSourceError;
 use image::DynamicImage;
 use std::path::Path;
 
+pub mod error;
 pub mod image_source_factory;
-
 pub mod jpg_source;
 pub mod mp4_source;
-
-#[derive(Debug)]
-pub enum ImageSourceError {
-    Mp4SourceError(Mp4SourceError),
-}
 
 pub trait HasStaticDimensions {
     fn width(&self) -> usize;

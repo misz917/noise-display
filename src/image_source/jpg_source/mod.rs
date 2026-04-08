@@ -1,8 +1,10 @@
-use crate::image_source::{Dimensions, HasStaticDimensions, ImageSource, ImageSourceError};
+use crate::image_source::{
+    Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
+    jpg_source::error::JpgSourceError,
+};
 use image::DynamicImage;
 
-#[derive(Debug)]
-pub enum JpgSourceErrror {}
+pub mod error;
 
 pub(crate) struct JpgSource {
     dimensions: Dimensions,
