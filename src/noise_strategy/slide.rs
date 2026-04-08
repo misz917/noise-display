@@ -1,13 +1,13 @@
 use crate::{
     color::{BLACK, WHITE},
-    randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
+    noise_strategy::{NoiseStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
 };
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
 pub struct SlideStrategy;
 
-impl RandomisationStrategy for SlideStrategy {
+impl NoiseStrategy for SlideStrategy {
     fn randomise(&self, buffer: &mut ScreenBuffer, mask: Option<&[bool]>) {
         let c_screen_buffer = buffer.clone();
         let c_buffer = c_screen_buffer.get_buffer();

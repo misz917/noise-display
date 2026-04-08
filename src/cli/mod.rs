@@ -3,8 +3,8 @@ use crate::{
     cli::args::Args,
     image_source::image_source_factory::ImageSourceFactory,
     noise_display::{NoiseDisplay, interface::NoiseDisplayInterface},
-    randomisation_strategy::{
-        RandomisationStrategy, black_white::BlackWhiteStrategy, rainbow::RainbowStrategy,
+    noise_strategy::{
+        NoiseStrategy, black_white::BlackWhiteStrategy, rainbow::RainbowStrategy,
         slide::SlideStrategy,
     },
 };
@@ -19,7 +19,7 @@ impl Cli {
         let args = Args::parse();
 
         let path = args.path.ok_or("Path not provided")?;
-        let strategy: Box<dyn RandomisationStrategy> = match args.strat.as_deref() {
+        let strategy: Box<dyn NoiseStrategy> = match args.strat.as_deref() {
             Some("bw") => Box::new(BlackWhiteStrategy),
             Some("r") => Box::new(RainbowStrategy),
             Some("s") => Box::new(SlideStrategy),
@@ -44,7 +44,7 @@ impl Cli {
                 let mut display = Display::new();
                 display.set_noise_strategy(Box::new(BlackWhiteStrategy));
 
-                let strat: Box<dyn RandomisationStrategy> = match args.strat.as_deref() {
+                let strat: Box<dyn NoiseStrategy> = match args.strat.as_deref() {
                     Some("bw") | Some("blackwhite") => Box::new(BlackWhiteStrategy),
                     Some("r") | Some("rainbow") => Box::new(RainbowStrategy),
                     Some("s") | Some("slide") => Box::new(SlideStrategy),

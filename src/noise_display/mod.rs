@@ -3,7 +3,7 @@ use crate::{
     image_source::ImageSource,
     into_binary::IntoFlatBinary,
     noise_display::interface::NoiseDisplayInterface,
-    randomisation_strategy::{RandomisationStrategy, black_white::BlackWhiteStrategy},
+    noise_strategy::{NoiseStrategy, black_white::BlackWhiteStrategy},
     screen_buffer::ScreenBuffer,
 };
 use minifb::{Key, Scale, Window, WindowOptions};
@@ -16,13 +16,13 @@ const DEFAULT_BINARIZATION_THRESHOLD: u8 = 127;
 pub struct NoiseDisplay {
     target_fps: usize,
     binarization_threshold: u8,
-    noise_strategy: Box<dyn RandomisationStrategy>,
+    noise_strategy: Box<dyn NoiseStrategy>,
 }
 
 impl NoiseDisplayInterface for NoiseDisplay {
     fn new(
         target_fps: usize,
-        noise_strategy: Box<dyn RandomisationStrategy>,
+        noise_strategy: Box<dyn NoiseStrategy>,
         binarization_threshold: u8,
     ) -> Self
     where

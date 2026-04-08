@@ -4,7 +4,7 @@ pub mod black_white;
 pub mod rainbow;
 pub mod slide;
 
-pub trait RandomisationStrategy {
+pub trait NoiseStrategy {
     fn init(&self, buffer: &mut ScreenBuffer);
     fn randomise(&self, buffer: &mut ScreenBuffer, mask: Option<&[bool]>);
 }

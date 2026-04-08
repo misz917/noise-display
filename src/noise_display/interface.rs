@@ -1,9 +1,9 @@
-use crate::{image_source::ImageSource, randomisation_strategy::RandomisationStrategy};
+use crate::{image_source::ImageSource, noise_strategy::NoiseStrategy};
 
 pub trait NoiseDisplayInterface {
     fn new(
         target_fps: usize,
-        noise_strategy: Box<dyn RandomisationStrategy>,
+        noise_strategy: Box<dyn NoiseStrategy>,
         binarization_threshold: u8,
     ) -> Self
     where

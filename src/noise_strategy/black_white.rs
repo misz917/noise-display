@@ -1,9 +1,13 @@
-use crate::{randomisation_strategy::RandomisationStrategy, screen_buffer::ScreenBuffer};
+use crate::{
+    color::{BLACK, WHITE},
+    noise_strategy::NoiseStrategy,
+    screen_buffer::ScreenBuffer,
+};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
-pub struct RainbowStrategy;
+pub struct BlackWhiteStrategy;
 
-impl RandomisationStrategy for RainbowStrategy {
+impl NoiseStrategy for BlackWhiteStrategy {
     /// mask: if true => change the pixel; if false => leave unchanged
     fn randomise(&self, buffer: &mut ScreenBuffer, mask: Option<&[bool]>) {
         buffer
@@ -12,7 +16,11 @@ impl RandomisationStrategy for RainbowStrategy {
             .enumerate()
             .for_each(|(i, pixel)| {
                 if mask.is_none() || !mask.unwrap()[i] {
-                    *pixel = rand::random_range(0..=0xFFFFFF);
+                    if rand::random_bool(0.5) {
+                        *pixel = BLACK;
+                    } else {
+                        *pixel = WHITE;
+                    }
                 }
             });
     }
