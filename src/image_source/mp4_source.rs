@@ -4,10 +4,15 @@ use image::DynamicImage;
 
 use crate::{
     extract_frames::extract_frames_with_ffmpeg,
-    image_source::{Dimensions, HasStaticDimensions, ImageSource},
+    image_source::{Dimensions, HasStaticDimensions, ImageSource, ImageSourceError},
 };
 
 const TEMP_FILE_PATH: &str = "./temp/";
+
+#[derive(Debug)]
+pub enum Mp4SourceError {
+    TemporaryDirectoryCreation,
+}
 
 pub(crate) struct Mp4Source {
     dimensions: Dimensions,
@@ -15,14 +20,24 @@ pub(crate) struct Mp4Source {
 }
 
 impl ImageSource for Mp4Source {
-    fn new(path: &std::path::Path) -> Self
+    fn new(path: &std::path::Path) -> Result<Mp4Source, ImageSourceError>
     where
         Self: Sized,
     {
         assert!(path.is_file());
 
         let temp_file_path = PathBuf::from_str(TEMP_FILE_PATH).unwrap();
-        fs::create_dir(&temp_file_path).unwrap();
+
+        if let Err(err) = fs::create_dir(&temp_file_path) {
+            match err.kind() {
+                std::io::ErrorKind::AlreadyExists => (/* do nothing */),
+                _ => {
+                    return Err(ImageSourceError::Mp4SourceError(
+                        Mp4SourceError::TemporaryDirectoryCreation,
+                    ));
+                }
+            }
+        }
         extract_frames_with_ffmpeg(&path, &temp_file_path).unwrap();
 
         assert!(temp_file_path.is_dir());
@@ -41,7 +56,7 @@ impl ImageSource for Mp4Source {
 
         let dimensions = Dimensions { width, height };
 
-        Self { dimensions, memory }
+        Ok(Self { dimensions, memory })
     }
 
     fn next(&mut self) -> Option<image::DynamicImage> {

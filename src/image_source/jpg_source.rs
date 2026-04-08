@@ -1,5 +1,8 @@
-use crate::image_source::{Dimensions, HasStaticDimensions, ImageSource};
+use crate::image_source::{Dimensions, HasStaticDimensions, ImageSource, ImageSourceError};
 use image::DynamicImage;
+
+#[derive(Debug)]
+pub enum JpgSourceErrror {}
 
 pub(crate) struct JpgSource {
     dimensions: Dimensions,
@@ -7,7 +10,7 @@ pub(crate) struct JpgSource {
 }
 
 impl ImageSource for JpgSource {
-    fn new(path: &std::path::Path) -> Self
+    fn new(path: &std::path::Path) -> Result<JpgSource, ImageSourceError>
     where
         Self: Sized,
     {
@@ -19,10 +22,10 @@ impl ImageSource for JpgSource {
             height: image.height().try_into().unwrap(),
         };
 
-        Self {
+        Ok(Self {
             dimensions,
             image: Some(image),
-        }
+        })
     }
 
     fn next(&mut self) -> Option<DynamicImage> {

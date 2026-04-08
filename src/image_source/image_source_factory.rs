@@ -7,8 +7,8 @@ impl ImageSourceFactory {
     pub fn new_image_source(path: &Path) -> Box<dyn ImageSource> {
         let extension = path.extension().unwrap().to_str().unwrap();
         let image_source: Box<dyn ImageSource> = match extension {
-            "jpg" => Box::new(JpgSource::new(path)),
-            "mp4" => Box::new(Mp4Source::new(path)),
+            "jpg" => Box::new(JpgSource::new(path).unwrap()),
+            "mp4" => Box::new(Mp4Source::new(path).unwrap()),
             _ => unimplemented!(),
         };
 
