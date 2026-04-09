@@ -10,7 +10,15 @@ pub struct ImageSourceFactory;
 
 impl ImageSourceFactory {
     pub fn new_image_source(path: &Path) -> Result<Box<dyn ImageSource>, ImageSourceFactoryError> {
-        let extension = path.extension().unwrap().to_str().unwrap();
+        let extension = path
+            .extension()
+            .ok_or(ImageSourceFactoryError::UnsupportedFileExtension(
+                path.to_str().unwrap().to_string(),
+            ))?
+            .to_str()
+            .ok_or(ImageSourceFactoryError::NonUtf8Extension)?;
+
+        // .unwrap().to_str().unwrap();
         let image_source: Box<dyn ImageSource> = match extension {
             "jpg" => Box::new(JpgSource::new(path).unwrap()),
             "mp4" => Box::new(Mp4Source::new(path).unwrap()),
