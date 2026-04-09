@@ -26,7 +26,7 @@ impl Cli {
             _ => Box::new(BlackWhiteStrategy),
         };
 
-        let image_source = ImageSourceFactory::new_image_source(&path);
+        let image_source = ImageSourceFactory::new_image_source(&path).unwrap();
         let mut display = NoiseDisplay::new(DEFAULT_TARGET_FPS, strategy, BINARIZATION_THRESHOLD);
         display.display(image_source);
 
