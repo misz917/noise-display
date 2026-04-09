@@ -1,10 +1,10 @@
 use crate::image_source::{
     Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-    jpg_source::error::JpgSourceError,
+    jpg_source::error_codes::JpgSourceError,
 };
 use image::DynamicImage;
 
-pub mod error;
+pub mod error_codes;
 
 pub(crate) struct JpgSource {
     dimensions: Dimensions,

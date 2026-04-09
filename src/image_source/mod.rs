@@ -1,8 +1,8 @@
-use crate::image_source::error::ImageSourceError;
+use crate::image_source::error_codes::ImageSourceError;
 use image::DynamicImage;
 use std::path::Path;
 
-pub mod error;
+pub mod error_codes;
 pub mod image_source_factory;
 pub mod jpg_source;
 pub mod mp4_source;

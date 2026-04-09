@@ -2,13 +2,13 @@ use crate::{
     extract_frames::extract_frames_with_ffmpeg,
     image_source::{
         Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-        mp4_source::error::Mp4SourceError,
+        mp4_source::error_codes::Mp4SourceError,
     },
 };
 use image::DynamicImage;
 use std::{collections::LinkedList, fs, path::PathBuf, str::FromStr};
 
-pub mod error;
+pub mod error_codes;
 
 const TEMP_FILE_PATH: &str = "./temp/";
 
