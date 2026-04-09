@@ -31,7 +31,7 @@ impl ImageSource for Mp4Source {
                 std::io::ErrorKind::AlreadyExists => (/* do nothing */),
                 _ => {
                     return Err(ImageSourceError::Mp4SourceError(
-                        Mp4SourceError::TemporaryDirectoryCreation,
+                        Mp4SourceError::FailedToCreateTemporaryDirectory,
                     ));
                 }
             }
