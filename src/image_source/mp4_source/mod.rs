@@ -53,9 +53,11 @@ impl ImageSource for Mp4Source {
             print!("\r{}", i);
         }
 
-        let first_image = memory.front().unwrap();
-        let width = first_image.width().try_into().unwrap();
-        let height = first_image.height().try_into().unwrap();
+        let first_image = memory.front().ok_or(ImageSourceError::Mp4SourceError(
+            Mp4SourceError::NoImageRead,
+        ))?;
+        let width = first_image.width().try_into()?;
+        let height = first_image.height().try_into()?;
 
         let dimensions = Dimensions { width, height };
 
@@ -73,6 +75,6 @@ impl HasStaticDimensions for Mp4Source {
     }
 
     fn height(&self) -> usize {
-        self.dimensions.width()
+        self.dimensions.height()
     }
 }
