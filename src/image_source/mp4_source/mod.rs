@@ -41,7 +41,14 @@ impl ImageSource for Mp4Source {
         let mut memory = LinkedList::new();
         let paths = fs::read_dir(path).unwrap();
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-            let image = image::open(path.join(file_name)).unwrap();
+            let image = match image::open(path.join(file_name)) {
+                Ok(image) => image,
+                Err(err) => {
+                    return Err(ImageSourceError::Mp4SourceError(
+                        Mp4SourceError::ImageError(err),
+                    ));
+                }
+            };
             memory.push_back(image);
             print!("\r{}", i);
         }
