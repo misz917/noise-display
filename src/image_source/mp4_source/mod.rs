@@ -38,8 +38,6 @@ impl ImageSource for Mp4Source {
         }
         extract_frames_with_ffmpeg(&path, &temp_file_path).unwrap();
 
-        assert!(temp_file_path.is_dir());
-
         let mut memory = LinkedList::new();
         let paths = fs::read_dir(path).unwrap();
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
