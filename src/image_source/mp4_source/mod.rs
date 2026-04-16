@@ -36,7 +36,7 @@ impl ImageSource for Mp4Source {
                 }
             }
         }
-        extract_frames_with_ffmpeg(&path, &temp_file_path)
+        extract_frames_with_ffmpeg(path, &temp_file_path)
             .map_err(|_| Mp4SourceError::FfmpegFrameExtractionError)?;
 
         let mut memory = LinkedList::new();

@@ -18,8 +18,8 @@ impl NoiseStrategy for SlideStrategy {
             .par_iter_mut()
             .enumerate()
             .for_each(|(i, pixel)| {
-                if !(mask.is_none() || !mask.unwrap()[i]) {
-                    if !(i % width == width - 1) {
+                if mask.is_some() && mask.unwrap()[i] {
+                    if i % width != width - 1 {
                         if mask.unwrap()[i + 1] {
                             *pixel = c_buffer[i + 1]
                         } else {

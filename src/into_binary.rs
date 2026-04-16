@@ -8,7 +8,7 @@ impl IntoFlatBinary for DynamicImage {
     fn binarize_and_flatten(&self, threshold: u8) -> Vec<bool> {
         let mut output = Vec::new();
         let gray = self.to_luma8();
-        let _ = gray.iter().for_each(|pixel| {
+        gray.iter().for_each(|pixel| {
             if *pixel > threshold {
                 output.push(true);
             } else {

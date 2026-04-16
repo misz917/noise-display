@@ -22,10 +22,10 @@ pub fn extract_frames_with_ffmpeg(input: &Path, out_dir: &Path) -> std::io::Resu
         .status()?;
 
     if !status.success() {
-        Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("ffmpeg exited with {}", status),
-        ))
+        Err(std::io::Error::other(format!(
+            "ffmpeg exited with {}",
+            status
+        )))
     } else {
         Ok(())
     }
