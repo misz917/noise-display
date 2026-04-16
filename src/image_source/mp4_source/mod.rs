@@ -24,7 +24,7 @@ impl ImageSource for Mp4Source {
     {
         assert!(path.is_file());
 
-        let temp_file_path = PathBuf::from_str(TEMP_FILE_PATH).unwrap();
+        let temp_file_path = PathBuf::from(TEMP_FILE_PATH);
 
         if let Err(err) = fs::create_dir(&temp_file_path) {
             match err.kind() {
@@ -36,10 +36,14 @@ impl ImageSource for Mp4Source {
                 }
             }
         }
-        extract_frames_with_ffmpeg(&path, &temp_file_path).unwrap();
+        extract_frames_with_ffmpeg(&path, &temp_file_path).map_err(|_| {
+            ImageSourceError::Mp4SourceError(Mp4SourceError::FfmpegFrameExtractionError)
+        })?;
 
         let mut memory = LinkedList::new();
-        let paths = fs::read_dir(path).unwrap();
+        let paths = fs::read_dir(path).map_err(|_| {
+            ImageSourceError::Mp4SourceError(Mp4SourceError::FailedToReadTemporaryDirectory)
+        })?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let image = match image::open(path.join(file_name)) {
                 Ok(image) => image,

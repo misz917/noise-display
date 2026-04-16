@@ -8,6 +8,8 @@ pub enum Mp4SourceError {
     ImageError(ImageError),
     NoImageRead,
     FailedU32UsizeConversion,
+    FailedToReadTemporaryDirectory,
+    FfmpegFrameExtractionError,
 }
 
 impl From<std::num::TryFromIntError> for ImageSourceError {
