@@ -6,7 +6,7 @@ use crate::{
     },
 };
 use image::DynamicImage;
-use std::{collections::LinkedList, fs, path::PathBuf, str::FromStr};
+use std::{collections::LinkedList, fs, path::PathBuf};
 
 pub mod error_codes;
 
@@ -36,30 +36,20 @@ impl ImageSource for Mp4Source {
                 }
             }
         }
-        extract_frames_with_ffmpeg(&path, &temp_file_path).map_err(|_| {
-            ImageSourceError::Mp4SourceError(Mp4SourceError::FfmpegFrameExtractionError)
-        })?;
+        extract_frames_with_ffmpeg(&path, &temp_file_path)
+            .map_err(|_| Mp4SourceError::FfmpegFrameExtractionError)?;
 
         let mut memory = LinkedList::new();
-        let paths = fs::read_dir(path).map_err(|_| {
-            ImageSourceError::Mp4SourceError(Mp4SourceError::FailedToReadTemporaryDirectory)
-        })?;
+        let paths =
+            fs::read_dir(path).map_err(|_| Mp4SourceError::FailedToReadTemporaryDirectory)?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-            let image = match image::open(path.join(file_name)) {
-                Ok(image) => image,
-                Err(err) => {
-                    return Err(ImageSourceError::Mp4SourceError(
-                        Mp4SourceError::ImageError(err),
-                    ));
-                }
-            };
+            let image =
+                image::open(path.join(file_name)).map_err(|err| Mp4SourceError::ImageError(err))?;
             memory.push_back(image);
             print!("\r{}", i);
         }
 
-        let first_image = memory.front().ok_or(ImageSourceError::Mp4SourceError(
-            Mp4SourceError::NoImageRead,
-        ))?;
+        let first_image = memory.front().ok_or(Mp4SourceError::NoImageRead)?;
         let width = first_image.width().try_into()?;
         let height = first_image.height().try_into()?;
 

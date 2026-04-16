@@ -7,3 +7,9 @@ pub enum ImageSourceError {
     Mp4SourceError(Mp4SourceError),
     JpgSourceError(JpgSourceError),
 }
+
+impl From<Mp4SourceError> for ImageSourceError {
+    fn from(value: Mp4SourceError) -> Self {
+        ImageSourceError::Mp4SourceError(value)
+    }
+}
