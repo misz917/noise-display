@@ -2,6 +2,6 @@
 pub enum Mp4SourceError {
     FailedToCreateTemporaryDirectory,
     NoImageRead,
-    FailedToReadTemporaryDirectory,
+    FailedToReadTemporaryDirectory(std::io::Error),
     FfmpegFrameExtractionError,
 }

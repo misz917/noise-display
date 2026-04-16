@@ -40,8 +40,8 @@ impl ImageSource for Mp4Source {
             .map_err(|_| Mp4SourceError::FfmpegFrameExtractionError)?;
 
         let mut memory = LinkedList::new();
-        let paths =
-            fs::read_dir(path).map_err(|_| Mp4SourceError::FailedToReadTemporaryDirectory)?;
+        let paths = fs::read_dir(path)
+            .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let image = image::open(path.join(file_name))?;
             memory.push_back(image);

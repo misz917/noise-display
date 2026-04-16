@@ -87,7 +87,7 @@ impl NoiseDisplay {
             width,
             height,
             WindowOptions {
-                scale: Scale::X4,
+                scale: Scale::FitScreen,
                 ..WindowOptions::default()
             },
         )?;
