@@ -54,7 +54,7 @@ impl ImageSource for Mp4Source {
         let paths = fs::read_dir(&temp_dir_path)
             .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-            let image = image::open(path.join(file_name))?;
+            let image = image::open(&temp_dir_path.join(file_name))?;
             memory.push_back(image);
             print!("\r{}", i);
         }
