@@ -6,15 +6,20 @@ use crate::{
     },
 };
 use image::DynamicImage;
-use std::{collections::LinkedList, fs, path::PathBuf};
+use std::{
+    collections::LinkedList,
+    env, fs,
+    path::{Path, PathBuf},
+};
+use tracing::error;
+use uuid::Uuid;
 
 pub mod error_codes;
-
-const TEMP_FILE_PATH: &str = "./temp/";
 
 pub(crate) struct Mp4Source {
     dimensions: Dimensions,
     memory: LinkedList<DynamicImage>,
+    temp_dir_path: Option<PathBuf>,
 }
 
 impl ImageSource for Mp4Source {
@@ -22,13 +27,15 @@ impl ImageSource for Mp4Source {
     where
         Self: Sized,
     {
-        assert!(path.is_file());
+        let mut temp_dir_path = env::temp_dir();
+        let uuid = Uuid::new_v4();
+        let uuid_path = PathBuf::from(&uuid.to_string());
 
-        let temp_file_path = PathBuf::from(TEMP_FILE_PATH);
+        temp_dir_path.push(uuid_path);
 
-        if let Err(err) = fs::create_dir(&temp_file_path) {
+        if let Err(err) = fs::create_dir_all(&temp_dir_path) {
             match err.kind() {
-                std::io::ErrorKind::AlreadyExists => (/* do nothing */),
+                std::io::ErrorKind::AlreadyExists => { /* nothing */ }
                 _ => {
                     return Err(ImageSourceError::Mp4SourceError(
                         Mp4SourceError::FailedToCreateTemporaryDirectory,
@@ -36,8 +43,12 @@ impl ImageSource for Mp4Source {
                 }
             }
         }
-        extract_frames_with_ffmpeg(path, &temp_file_path)
-            .map_err(|_| Mp4SourceError::FfmpegFrameExtractionError)?;
+
+        if let Err(_err) = extract_frames_with_ffmpeg(path, &temp_dir_path)
+            .map_err(|_| Mp4SourceError::FfmpegFrameExtractionError)
+        {
+            Self::remove_temporary_dir(&temp_dir_path)?;
+        }
 
         let mut memory = LinkedList::new();
         let paths = fs::read_dir(path)
@@ -54,7 +65,11 @@ impl ImageSource for Mp4Source {
 
         let dimensions = Dimensions { width, height };
 
-        Ok(Self { dimensions, memory })
+        Ok(Self {
+            dimensions,
+            memory,
+            temp_dir_path: Some(temp_dir_path),
+        })
     }
 
     fn next(&mut self) -> Option<image::DynamicImage> {
@@ -69,5 +84,21 @@ impl HasStaticDimensions for Mp4Source {
 
     fn height(&self) -> usize {
         self.dimensions.height()
+    }
+}
+
+impl Mp4Source {
+    fn remove_temporary_dir(path: &Path) -> Result<(), Mp4SourceError> {
+        fs::remove_dir_all(path).map_err(|err| Mp4SourceError::FailedTemporaryDirCleanup(err))
+    }
+}
+
+impl Drop for Mp4Source {
+    fn drop(&mut self) {
+        if let Some(path) = &self.temp_dir_path {
+            if let Err(err) = Self::remove_temporary_dir(path) {
+                error!("{}", err);
+            }
+        }
     }
 }
