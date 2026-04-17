@@ -1,4 +1,6 @@
-use crate::image_source::{Dimensions, HasStaticDimensions, ImageSource, ImageSourceError};
+use crate::image_source::{
+    Dimensions, HasStaticDimensions, ImageSource, ImageSourceError, indexed_image::IndexedImage,
+};
 use image::DynamicImage;
 
 pub(crate) struct JpgSource {
@@ -23,8 +25,11 @@ impl ImageSource for JpgSource {
         })
     }
 
-    fn next(&mut self) -> Option<DynamicImage> {
-        self.image.take()
+    fn next(&mut self) -> Option<IndexedImage> {
+        let image = self.image.take().unwrap();
+        let index = 0;
+
+        Some(IndexedImage::new(index, image))
     }
 }
 

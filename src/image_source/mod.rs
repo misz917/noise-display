@@ -1,9 +1,9 @@
-use crate::image_source::error_codes::ImageSourceError;
-use image::DynamicImage;
+use crate::image_source::{error_codes::ImageSourceError, indexed_image::IndexedImage};
 use std::path::Path;
 
 pub mod error_codes;
 pub mod image_source_factory;
+pub mod indexed_image;
 pub mod jpg_source;
 pub mod mp4_source;
 
@@ -16,7 +16,7 @@ pub trait ImageSource: HasStaticDimensions {
     fn new(path: &Path) -> Result<Self, ImageSourceError>
     where
         Self: Sized;
-    fn next(&mut self) -> Option<DynamicImage>;
+    fn next(&mut self) -> Option<IndexedImage>;
 }
 
 pub(crate) struct Dimensions {

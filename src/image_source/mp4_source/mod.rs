@@ -2,10 +2,9 @@ use crate::{
     extract_frames::extract_frames_with_ffmpeg,
     image_source::{
         Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-        mp4_source::error_codes::Mp4SourceError,
+        indexed_image::IndexedImage, mp4_source::error_codes::Mp4SourceError,
     },
 };
-use image::DynamicImage;
 use std::{
     collections::LinkedList,
     env, fs,
@@ -18,7 +17,7 @@ pub mod error_codes;
 
 pub(crate) struct Mp4Source {
     dimensions: Dimensions,
-    memory: LinkedList<DynamicImage>,
+    memory: LinkedList<IndexedImage>,
     temp_dir_path: Option<PathBuf>,
 }
 
@@ -51,30 +50,36 @@ impl ImageSource for Mp4Source {
             Self::remove_temporary_dir(&temp_dir_path)?;
         }
 
-        let mut memory = LinkedList::new();
+        let mut memory: LinkedList<IndexedImage> = LinkedList::new();
         let paths = fs::read_dir(&temp_dir_path)
             .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let full_path = &temp_dir_path.join(file_name);
             let image = image::open(&full_path)?;
-            memory.push_back(image);
+            memory.push_back(IndexedImage::new(i, image));
             print!("\r{}", i);
         }
 
-        let first_image = memory.front().ok_or(Mp4SourceError::NoImageRead)?;
-        let width = first_image.width().try_into()?;
-        let height = first_image.height().try_into()?;
+        let first_image = memory
+            .front()
+            .ok_or(Mp4SourceError::NoImageRead)?
+            .image_peek()
+            .ok_or(Mp4SourceError::NoImageRead)?;
+        {
+            let width = first_image.width().try_into()?;
+            let height = first_image.height().try_into()?;
 
-        let dimensions = Dimensions { width, height };
+            let dimensions = Dimensions { width, height };
 
-        Ok(Self {
-            dimensions,
-            memory,
-            temp_dir_path: Some(temp_dir_path),
-        })
+            Ok(Self {
+                dimensions,
+                memory,
+                temp_dir_path: Some(temp_dir_path),
+            })
+        }
     }
 
-    fn next(&mut self) -> Option<image::DynamicImage> {
+    fn next(&mut self) -> Option<IndexedImage> {
         self.memory.pop_front()
     }
 }
