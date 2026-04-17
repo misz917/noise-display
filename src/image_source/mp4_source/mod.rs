@@ -11,7 +11,7 @@ use std::{
     env, fs,
     path::{Path, PathBuf},
 };
-use tracing::error;
+use tracing::{error, info};
 use uuid::Uuid;
 
 pub mod error_codes;
@@ -32,6 +32,7 @@ impl ImageSource for Mp4Source {
         let uuid_path = PathBuf::from(&uuid.to_string());
 
         temp_dir_path.push(uuid_path);
+        info!("Temporary directory path {:?}", temp_dir_path);
 
         if let Err(err) = fs::create_dir_all(&temp_dir_path) {
             match err.kind() {
@@ -54,7 +55,8 @@ impl ImageSource for Mp4Source {
         let paths = fs::read_dir(&temp_dir_path)
             .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
-            let image = image::open(&temp_dir_path.join(file_name))?;
+            let full_path = &temp_dir_path.join(file_name);
+            let image = image::open(&full_path)?;
             memory.push_back(image);
             print!("\r{}", i);
         }
