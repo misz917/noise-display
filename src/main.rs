@@ -2,6 +2,7 @@ use tracing_subscriber::{EnvFilter, fmt};
 
 use crate::cli::Cli;
 
+pub mod binarization_strategy;
 pub mod cli;
 pub mod color;
 pub mod extract_frames;
