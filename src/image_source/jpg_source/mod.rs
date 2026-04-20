@@ -31,6 +31,10 @@ impl ImageSource for JpgSource {
 
         Some(IndexedImage::new(index, image))
     }
+
+    fn fps(&self) -> usize {
+        0
+    }
 }
 
 impl HasStaticDimensions for JpgSource {

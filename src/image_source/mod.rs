@@ -17,6 +17,7 @@ pub trait ImageSource: HasStaticDimensions {
     where
         Self: Sized;
     fn next(&mut self) -> Option<IndexedImage>;
+    fn fps(&self) -> usize;
 }
 
 pub(crate) struct Dimensions {

@@ -1,5 +1,5 @@
 use crate::{
-    extract_frames::extract_frames_with_ffmpeg,
+    extract_frames::{extract_frames_with_ffmpeg, get_fps},
     image_source::{
         Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
         indexed_image::IndexedImage, mp4_source::error_codes::Mp4SourceError,
@@ -16,6 +16,7 @@ use uuid::Uuid;
 pub mod error_codes;
 
 pub(crate) struct Mp4Source {
+    input_path: Box<PathBuf>,
     dimensions: Dimensions,
     memory: LinkedList<IndexedImage>,
     temp_dir_path: Option<PathBuf>,
@@ -75,12 +76,17 @@ impl ImageSource for Mp4Source {
                 dimensions,
                 memory,
                 temp_dir_path: Some(temp_dir_path),
+                input_path: Box::new(path.to_owned()),
             })
         }
     }
 
     fn next(&mut self) -> Option<IndexedImage> {
         self.memory.pop_front()
+    }
+
+    fn fps(&self) -> usize {
+        get_fps(&self.input_path).unwrap() as usize
     }
 }
 
