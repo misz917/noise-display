@@ -30,3 +30,35 @@ pub fn extract_frames_with_ffmpeg(input: &Path, out_dir: &Path) -> std::io::Resu
         Ok(())
     }
 }
+
+pub fn get_fps(input: &Path) -> std::io::Result<f64> {
+    let output = Command::new("ffprobe")
+        .arg("-v")
+        .arg("error")
+        .arg("-select_streams")
+        .arg("v:0")
+        .arg("-show_entries")
+        .arg("stream=r_frame_rate")
+        .arg("-of")
+        .arg("default=noprint_wrappers=1:nokey=1")
+        .arg(input)
+        .output()?;
+
+    if !output.status.success() {
+        return Err(std::io::Error::other("ffprobe failed"));
+    }
+
+    let fps_str = String::from_utf8_lossy(&output.stdout);
+    let fps_str = fps_str.trim();
+
+    // Parse something like "30000/1001"
+    let parts: Vec<&str> = fps_str.split('/').collect();
+    if parts.len() == 2 {
+        let num: f64 = parts[0].parse().unwrap_or(0.0);
+        let den: f64 = parts[1].parse().unwrap_or(1.0);
+        Ok(num / den)
+    } else {
+        // Sometimes it's already a single number
+        Ok(fps_str.parse().unwrap_or(0.0))
+    }
+}
