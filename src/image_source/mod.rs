@@ -4,7 +4,9 @@ use std::path::Path;
 pub mod error_codes;
 pub mod image_source_factory;
 pub mod indexed_image;
+
 pub mod jpg_source;
+pub mod mock_source;
 pub mod mp4_source;
 
 pub trait HasStaticDimensions {
