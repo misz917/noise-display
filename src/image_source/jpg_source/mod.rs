@@ -26,7 +26,7 @@ impl ImageSource for JpgSource {
     }
 
     fn next(&mut self) -> Option<IndexedImage> {
-        let image = self.image.take().unwrap();
+        let image = self.image.take()?;
         let index = 0;
 
         Some(IndexedImage::new(index, image))
