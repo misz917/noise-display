@@ -27,8 +27,9 @@ impl Cli {
         };
 
         let image_source = ImageSourceFactory::new_image_source(&path).unwrap();
-        let mut display = NoiseDisplay::new(DEFAULT_TARGET_FPS, strategy, BINARIZATION_THRESHOLD);
-        display.display(image_source);
+        let mut display = NoiseDisplay::default();
+        display.set_image_source(image_source);
+        display.run().unwrap();
 
         Ok(())
     }

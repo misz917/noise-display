@@ -1,13 +1,18 @@
-use crate::{image_source::ImageSource, noise_strategy::NoiseStrategy};
+use crate::{
+    image_source::ImageSource, noise_display::error_codes::NoiseDisplayError,
+    noise_strategy::NoiseStrategy,
+};
 
 pub trait NoiseDisplayInterface {
     fn new(
-        target_fps: usize,
-        noise_strategy: Box<dyn NoiseStrategy>,
         binarization_threshold: u8,
+        noise_strategy: Box<dyn NoiseStrategy>,
+        image_source: Option<Box<dyn ImageSource>>,
     ) -> Self
     where
         Self: Sized;
 
-    fn display(&mut self, image_source: Box<dyn ImageSource>);
+    fn set_image_source(&mut self, image_source: Box<dyn ImageSource>) -> &mut Self;
+
+    fn run(&mut self) -> Result<(), NoiseDisplayError>;
 }
