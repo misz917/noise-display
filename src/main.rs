@@ -13,9 +13,6 @@ pub mod screen_buffer;
 
 pub mod noise_display;
 
-const DEFAULT_TARGET_FPS: usize = 30;
-const BINARIZATION_THRESHOLD: u8 = 127;
-
 fn init_tracing() {
     fmt()
         .with_env_filter(

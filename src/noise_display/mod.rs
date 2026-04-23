@@ -51,6 +51,12 @@ impl NoiseDisplayInterface for NoiseDisplay {
         return self;
     }
 
+    fn set_noise_strategy(&mut self, noise_strategy: Box<dyn NoiseStrategy>) -> &mut Self {
+        self.noise_strategy = noise_strategy;
+
+        return self;
+    }
+
     fn run(&mut self) -> Result<(), NoiseDisplayError> {
         self.startup()?;
         self.main_loop()

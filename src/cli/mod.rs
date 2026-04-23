@@ -1,5 +1,4 @@
 use crate::{
-    BINARIZATION_THRESHOLD, DEFAULT_TARGET_FPS,
     cli::args::Args,
     image_source::image_source_factory::ImageSourceFactory,
     noise_display::{NoiseDisplay, interface::NoiseDisplayInterface},
@@ -25,10 +24,11 @@ impl Cli {
             Some("s") => Box::new(SlideStrategy),
             _ => Box::new(BlackWhiteStrategy),
         };
-
         let image_source = ImageSourceFactory::new_image_source(&path).unwrap();
+
         let mut display = NoiseDisplay::default();
         display.set_image_source(image_source);
+        display.set_noise_strategy(strategy);
         display.run().unwrap();
 
         Ok(())
