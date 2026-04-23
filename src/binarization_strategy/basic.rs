@@ -9,7 +9,7 @@ pub struct BasicBinarizationStrategy {
 
 impl BasicBinarizationStrategy {
     pub fn new(threshold: u8) -> Self {
-        Self { threshold: 127 }
+        Self { threshold }
     }
 }
 
