@@ -82,7 +82,7 @@ impl ImageSource for Mp4Source {
     }
 
     fn next(&mut self) -> Option<IndexedImage> {
-        self.memory.pop_front()
+        self.memory.pop_back()
     }
 
     fn fps(&self) -> usize {
