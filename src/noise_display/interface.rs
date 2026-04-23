@@ -12,9 +12,11 @@ pub trait NoiseDisplayInterface {
     where
         Self: Sized;
 
-    fn set_image_source(&mut self, image_source: Box<dyn ImageSource>) -> &mut Self;
-
-    fn set_noise_strategy(&mut self, noise_strategy: Box<dyn NoiseStrategy>) -> &mut Self;
-
     fn run(&mut self) -> Result<(), NoiseDisplayError>;
+    fn set_image_source(&mut self, image_source: Box<dyn ImageSource>) -> &mut Self;
+    fn set_noise_strategy(&mut self, noise_strategy: Box<dyn NoiseStrategy>) -> &mut Self;
+    fn set_binarization_strategy(
+        &mut self,
+        binarization_strategy: Box<dyn BinarizationStrategy>,
+    ) -> &mut Self;
 }

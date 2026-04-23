@@ -57,6 +57,11 @@ impl NoiseDisplayInterface for NoiseDisplay {
         }
     }
 
+    fn run(&mut self) -> Result<(), NoiseDisplayError> {
+        self.startup()?;
+        self.main_loop()
+    }
+
     fn set_image_source(&mut self, image_source: Box<dyn ImageSource>) -> &mut Self {
         self.image_source = Some(image_source);
 
@@ -69,9 +74,13 @@ impl NoiseDisplayInterface for NoiseDisplay {
         return self;
     }
 
-    fn run(&mut self) -> Result<(), NoiseDisplayError> {
-        self.startup()?;
-        self.main_loop()
+    fn set_binarization_strategy(
+        &mut self,
+        binarization_strategy: Box<dyn BinarizationStrategy>,
+    ) -> &mut Self {
+        self.binarization_strategy = binarization_strategy;
+
+        return self;
     }
 }
 
