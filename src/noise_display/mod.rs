@@ -13,11 +13,11 @@ pub mod interface;
 const WINDOW_NAME: &str = "Noise Display";
 const DEFAULT_TARGET_FPS: usize = 30;
 
-struct RuntimeResources {
-    screen_buffer: ScreenBuffer,
-    window: Window,
-    target_fps: usize,
-}
+// struct RuntimeResources {
+//     screen_buffer: ScreenBuffer,
+//     window: Window,
+//     target_fps: usize,
+// }
 
 pub struct NoiseDisplay {
     binarization_threshold: u8,
@@ -163,39 +163,3 @@ impl NoiseDisplay {
         Ok(())
     }
 }
-
-/*
-   fn display(&mut self, mut image_source: Box<dyn ImageSource>) {
-       self.image_source = Some(image_source);
-       self.startup();
-
-       ////////
-
-       // first time it has to return a Some
-       let mut image = image_source.next().unwrap();
-
-       let width = image.width() as usize;
-       let height = image.height() as usize;
-
-       let mut window = self.init_window(width, height, self.target_fps).unwrap();
-       let mut screen_buffer = ScreenBuffer::new(width, height);
-
-       let mut mask = image.binarize_and_flatten(self.binarization_threshold);
-
-       self.noise_strategy.init(&mut screen_buffer);
-
-       while window.is_open() && !window.is_key_down(Key::Escape) {
-           self.noise_strategy
-               .randomise(&mut screen_buffer, Some(&mask));
-
-           window
-               .update_with_buffer(screen_buffer.get_buffer(), width, height)
-               .unwrap();
-
-           if let Some(new_image) = image_source.next() {
-               image = new_image;
-               mask = image.binarize_and_flatten(self.binarization_threshold);
-           }
-       }
-   }
-*/
