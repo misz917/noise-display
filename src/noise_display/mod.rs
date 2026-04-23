@@ -11,21 +11,16 @@ pub mod error_codes;
 pub mod interface;
 
 const WINDOW_NAME: &str = "Noise Display";
-const DEFAULT_TARGET_FPS: usize = 30;
 
-// struct RuntimeResources {
-//     screen_buffer: ScreenBuffer,
-//     window: Window,
-//     target_fps: usize,
-// }
+struct RuntimeResources {
+    screen_buffer: Option<ScreenBuffer>,
+    window: Window,
+}
 
 pub struct NoiseDisplay {
     binarization_strategy: Box<dyn BinarizationStrategy>,
     noise_strategy: Box<dyn NoiseStrategy>,
     image_source: Option<Box<dyn ImageSource>>,
-    screen_buffer: Option<ScreenBuffer>,
-    window: Option<Window>,
-    target_fps: usize,
 }
 
 const DEFAULT_BINARIZATION_THRESHOLD: u8 = 127;
@@ -51,15 +46,12 @@ impl NoiseDisplayInterface for NoiseDisplay {
             binarization_strategy,
             noise_strategy,
             image_source,
-            screen_buffer: None,
-            window: None,
-            target_fps: DEFAULT_TARGET_FPS,
         }
     }
 
     fn run(&mut self) -> Result<(), NoiseDisplayError> {
-        self.startup()?;
-        self.main_loop()
+        let runtime_resources = self.startup()?;
+        self.main_loop(runtime_resources)
     }
 
     fn set_image_source(&mut self, image_source: Box<dyn ImageSource>) -> &mut Self {
@@ -118,31 +110,34 @@ impl NoiseDisplay {
 }
 
 impl NoiseDisplay {
-    fn startup(&mut self) -> Result<(), NoiseDisplayError> {
+    fn startup(&mut self) -> Result<RuntimeResources, NoiseDisplayError> {
+        let mut screen_buffer_option: Option<ScreenBuffer> = None;
+        let window: Window;
+
         if let Some(image_source) = &self.image_source {
             let mut screen_buffer = Self::init_buffer(&image_source);
-            let window = Self::init_window(&image_source)?;
-            let target_fps = image_source.fps();
-
+            window = Self::init_window(&image_source)?;
             self.noise_strategy.init(&mut screen_buffer);
 
-            self.screen_buffer = Some(screen_buffer);
-            self.window = Some(window);
-            self.target_fps = target_fps;
+            screen_buffer_option = Some(screen_buffer);
         } else {
-            self.window = Some(Self::init_window_default()?);
-            self.target_fps = DEFAULT_TARGET_FPS;
+            window = Self::init_window_default()?;
         }
 
-        Ok(())
+        Ok(RuntimeResources {
+            screen_buffer: screen_buffer_option,
+            window,
+        })
     }
 
-    fn main_loop(&mut self) -> Result<(), NoiseDisplayError> {
+    fn main_loop(&mut self, runtime_resources: RuntimeResources) -> Result<(), NoiseDisplayError> {
         let mut mask: Option<Vec<bool>> = None;
         let mut current_image_index = 0;
         let mut last_image_index = 0;
 
-        let window = self.window.as_mut().ok_or(NoiseDisplayError::Unexpected)?;
+        let mut screen_buffer = runtime_resources.screen_buffer;
+        let mut window = runtime_resources.window;
+
         while window.is_open() && !window.is_key_down(Key::Escape) {
             if let Some(image_source) = &mut self.image_source {
                 if let Some(mut indexed_image) = image_source.next() {
@@ -160,7 +155,7 @@ impl NoiseDisplay {
                 println!("{}", current_image_index);
             }
 
-            if let Some(screen_buffer) = &mut self.screen_buffer {
+            if let Some(screen_buffer) = &mut screen_buffer {
                 if let Some(mask) = &mask {
                     self.noise_strategy.randomise(screen_buffer, Some(&mask));
                 }
