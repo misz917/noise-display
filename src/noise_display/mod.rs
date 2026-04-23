@@ -1,6 +1,6 @@
 use crate::{
+    binarization_strategy::{BinarizationStrategy, basic::BasicBinarizationStrategy},
     image_source::{ImageSource, mock_source::MockSource},
-    into_binary::IntoFlatBinary,
     noise_display::{error_codes::NoiseDisplayError, interface::NoiseDisplayInterface},
     noise_strategy::NoiseStrategy,
     screen_buffer::ScreenBuffer,
@@ -20,8 +20,7 @@ const DEFAULT_TARGET_FPS: usize = 30;
 // }
 
 pub struct NoiseDisplay {
-    binarization_threshold: u8,
-    // binarization_strategy: Box<dyn BinarizationStrategy>,
+    binarization_strategy: Box<dyn BinarizationStrategy>,
     noise_strategy: Box<dyn NoiseStrategy>,
     image_source: Option<Box<dyn ImageSource>>,
     screen_buffer: Option<ScreenBuffer>,
@@ -29,14 +28,27 @@ pub struct NoiseDisplay {
     target_fps: usize,
 }
 
+const DEFAULT_BINARIZATION_THRESHOLD: u8 = 127;
+impl Default for NoiseDisplay {
+    fn default() -> Self {
+        Self::new(
+            Box::new(BasicBinarizationStrategy::new(
+                DEFAULT_BINARIZATION_THRESHOLD,
+            )),
+            Default::default(),
+            None,
+        )
+    }
+}
+
 impl NoiseDisplayInterface for NoiseDisplay {
     fn new(
-        binarization_threshold: u8,
+        binarization_strategy: Box<dyn BinarizationStrategy>,
         noise_strategy: Box<dyn NoiseStrategy>,
         image_source: Option<Box<dyn ImageSource>>,
     ) -> Self {
         Self {
-            binarization_threshold,
+            binarization_strategy,
             noise_strategy,
             image_source,
             screen_buffer: None,
@@ -60,12 +72,6 @@ impl NoiseDisplayInterface for NoiseDisplay {
     fn run(&mut self) -> Result<(), NoiseDisplayError> {
         self.startup()?;
         self.main_loop()
-    }
-}
-
-impl Default for NoiseDisplay {
-    fn default() -> Self {
-        Self::new(127, Default::default(), None)
     }
 }
 
@@ -133,7 +139,7 @@ impl NoiseDisplay {
                 if let Some(mut indexed_image) = image_source.next() {
                     current_image_index = indexed_image.index();
                     mask = if let Some(next_image) = indexed_image.image_pop() {
-                        Some(next_image.binarize_and_flatten(self.binarization_threshold))
+                        Some(self.binarization_strategy.binarize(next_image))
                     } else {
                         None
                     }

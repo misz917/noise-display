@@ -1,11 +1,11 @@
 use crate::{
-    image_source::ImageSource, noise_display::error_codes::NoiseDisplayError,
-    noise_strategy::NoiseStrategy,
+    binarization_strategy::BinarizationStrategy, image_source::ImageSource,
+    noise_display::error_codes::NoiseDisplayError, noise_strategy::NoiseStrategy,
 };
 
 pub trait NoiseDisplayInterface {
     fn new(
-        binarization_threshold: u8,
+        binarization_threshold: Box<dyn BinarizationStrategy>,
         noise_strategy: Box<dyn NoiseStrategy>,
         image_source: Option<Box<dyn ImageSource>>,
     ) -> Self
