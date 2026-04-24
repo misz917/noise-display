@@ -1,6 +1,7 @@
 use crate::{noise_strategy::black_white::BlackWhiteStrategy, screen_buffer::ScreenBuffer};
 
 pub mod black_white;
+pub mod color;
 pub mod rainbow;
 pub mod slide;
 

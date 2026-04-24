@@ -1,6 +1,9 @@
 use crate::{
-    color::{BLACK, WHITE},
-    noise_strategy::{NoiseStrategy, black_white::BlackWhiteStrategy},
+    noise_strategy::{
+        NoiseStrategy,
+        black_white::BlackWhiteStrategy,
+        color::{BLACK, WHITE},
+    },
     screen_buffer::ScreenBuffer,
 };
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};

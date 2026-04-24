@@ -4,7 +4,6 @@ use crate::cli::Cli;
 
 pub mod binarization_strategy;
 pub mod cli;
-pub mod color;
 pub mod extract_frames;
 pub mod image_source;
 pub mod noise_strategy;
