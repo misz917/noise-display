@@ -2,7 +2,7 @@ use crate::{
     extract_frames::{extract_frames_with_ffmpeg, get_fps},
     image_source::{
         Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-        indexed_image::IndexedImage, mp4_source::error_codes::Mp4SourceError,
+        indexed_image::IndexedImage, mp4_source_buffered::error_codes::Mp4SourceError,
     },
 };
 use std::{
@@ -15,15 +15,15 @@ use uuid::Uuid;
 
 pub mod error_codes;
 
-pub(crate) struct Mp4Source {
+pub(crate) struct Mp4SourceBuffered {
     input_path: Box<PathBuf>,
     dimensions: Dimensions,
     memory: LinkedList<IndexedImage>,
     temp_dir_path: Option<PathBuf>,
 }
 
-impl ImageSource for Mp4Source {
-    fn new(path: &std::path::Path) -> Result<Mp4Source, ImageSourceError>
+impl ImageSource for Mp4SourceBuffered {
+    fn new(path: &std::path::Path) -> Result<Mp4SourceBuffered, ImageSourceError>
     where
         Self: Sized,
     {
@@ -90,7 +90,7 @@ impl ImageSource for Mp4Source {
     }
 }
 
-impl HasStaticDimensions for Mp4Source {
+impl HasStaticDimensions for Mp4SourceBuffered {
     fn width(&self) -> usize {
         self.dimensions.width()
     }
@@ -100,13 +100,13 @@ impl HasStaticDimensions for Mp4Source {
     }
 }
 
-impl Mp4Source {
+impl Mp4SourceBuffered {
     fn remove_temporary_dir(path: &Path) -> Result<(), Mp4SourceError> {
         fs::remove_dir_all(path).map_err(|err| Mp4SourceError::FailedTemporaryDirCleanup(err))
     }
 }
 
-impl Drop for Mp4Source {
+impl Drop for Mp4SourceBuffered {
     fn drop(&mut self) {
         if let Some(path) = &self.temp_dir_path {
             if let Err(err) = Self::remove_temporary_dir(path) {

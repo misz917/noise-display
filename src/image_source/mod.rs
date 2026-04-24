@@ -7,7 +7,7 @@ pub mod indexed_image;
 
 pub mod jpg_source;
 pub mod mock_source;
-pub mod mp4_source;
+pub mod mp4_source_buffered;
 
 pub trait HasStaticDimensions {
     fn width(&self) -> usize;
