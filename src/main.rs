@@ -24,5 +24,5 @@ fn init_tracing() {
 
 fn main() {
     init_tracing();
-    Cli::new_run().unwrap();
+    Cli::run().unwrap();
 }

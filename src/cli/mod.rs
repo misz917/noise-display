@@ -14,7 +14,7 @@ pub mod args;
 pub struct Cli;
 
 impl Cli {
-    pub fn new_run() -> Result<(), Box<dyn std::error::Error>> {
+    pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         let args = Args::parse();
 
         let path = args.path.ok_or("Path not provided")?;
