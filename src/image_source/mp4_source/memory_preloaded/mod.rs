@@ -2,7 +2,7 @@ use crate::{
     extract_frames::{extract_frames_with_ffmpeg, get_fps},
     image_source::{
         Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-        indexed_image::IndexedImage, mp4_source_buffered::error_codes::Mp4SourceError,
+        indexed_image::IndexedImage, mp4_source::memory_preloaded::error_codes::Mp4SourceError,
     },
 };
 use std::{

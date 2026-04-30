@@ -1,6 +1,8 @@
 use crate::image_source::{
-    ImageSource, image_source_factory::error_codes::ImageSourceFactoryError, jpg_source::JpgSource,
-    mp4_source_buffered::Mp4SourceBuffered,
+    ImageSource,
+    image_source_factory::error_codes::ImageSourceFactoryError,
+    jpg_source::JpgSource,
+    mp4_source::{self},
 };
 use std::path::Path;
 
@@ -20,7 +22,7 @@ impl ImageSourceFactory {
 
         let image_source: Box<dyn ImageSource> = match extension {
             "jpg" => Box::new(JpgSource::new(path).unwrap()),
-            "mp4" => Box::new(Mp4SourceBuffered::new(path).unwrap()),
+            "mp4" => Box::new(mp4_source::streamed::Streamed::new(path).unwrap()),
             _ => {
                 return Err(ImageSourceFactoryError::UnsupportedFileExtension(
                     extension.to_string(),
