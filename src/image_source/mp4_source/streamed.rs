@@ -1,29 +1,27 @@
 use crate::{
     extract_frames::{extract_frames_with_ffmpeg, get_fps},
     image_source::{
-        Dimensions, HasStaticDimensions, ImageSource, ImageSourceError,
-        indexed_image::IndexedImage, mp4_source::memory_preloaded::error_codes::Mp4SourceError,
+        Dimensions, HasStaticDimensions, ImageSource, error_codes::ImageSourceError,
+        indexed_image::IndexedImage, mp4_source::error_codes::Mp4SourceError,
     },
 };
 use std::{
-    collections::LinkedList,
+    collections::VecDeque,
     env, fs,
     path::{Path, PathBuf},
 };
 use tracing::{error, info};
 use uuid::Uuid;
 
-pub mod error_codes;
-
-pub(crate) struct Mp4SourceBuffered {
+pub(crate) struct Streamed {
     input_path: Box<PathBuf>,
     dimensions: Dimensions,
-    memory: LinkedList<IndexedImage>,
     temp_dir_path: Option<PathBuf>,
+    image_paths: VecDeque<(usize, PathBuf)>,
 }
 
-impl ImageSource for Mp4SourceBuffered {
-    fn new(path: &std::path::Path) -> Result<Mp4SourceBuffered, ImageSourceError>
+impl ImageSource for Streamed {
+    fn new(path: &std::path::Path) -> Result<Self, ImageSourceError>
     where
         Self: Sized,
     {
@@ -51,38 +49,37 @@ impl ImageSource for Mp4SourceBuffered {
             Self::remove_temporary_dir(&temp_dir_path)?;
         }
 
-        let mut memory: LinkedList<IndexedImage> = LinkedList::new();
+        let mut memory: VecDeque<(usize, PathBuf)> = VecDeque::new();
         let paths = fs::read_dir(&temp_dir_path)
             .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let full_path = &temp_dir_path.join(file_name);
-            let image = image::open(&full_path)?;
-            memory.push_back(IndexedImage::new(i, image));
-            print!("\r{}", i);
+            memory.push_back((i, full_path.to_owned()));
         }
 
-        let first_image = memory
-            .front()
-            .ok_or(Mp4SourceError::NoImageRead)?
-            .image_peek()
-            .ok_or(Mp4SourceError::NoImageRead)?;
-        {
-            let width = first_image.width().try_into()?;
-            let height = first_image.height().try_into()?;
+        let first_image = image::open(&path)?;
+        let dimensions = Dimensions {
+            width: first_image.width() as usize,
+            height: first_image.height() as usize,
+        };
 
-            let dimensions = Dimensions { width, height };
-
-            Ok(Self {
-                dimensions,
-                memory,
-                temp_dir_path: Some(temp_dir_path),
-                input_path: Box::new(path.to_owned()),
-            })
-        }
+        Ok(Self {
+            dimensions,
+            input_path: Box::new(path.to_owned()),
+            temp_dir_path: Some(temp_dir_path),
+            image_paths: memory,
+        })
     }
 
     fn next(&mut self) -> Option<IndexedImage> {
-        self.memory.pop_back()
+        let path = self.image_paths.pop_front();
+        if let Some((index, path)) = path {
+            let image = image::open(&path).ok()?;
+            let indexed_image = IndexedImage::new(index, image);
+            return Some(indexed_image);
+        } else {
+            return None;
+        }
     }
 
     fn fps(&self) -> usize {
@@ -90,7 +87,7 @@ impl ImageSource for Mp4SourceBuffered {
     }
 }
 
-impl HasStaticDimensions for Mp4SourceBuffered {
+impl HasStaticDimensions for Streamed {
     fn width(&self) -> usize {
         self.dimensions.width()
     }
@@ -100,13 +97,13 @@ impl HasStaticDimensions for Mp4SourceBuffered {
     }
 }
 
-impl Mp4SourceBuffered {
+impl Streamed {
     fn remove_temporary_dir(path: &Path) -> Result<(), Mp4SourceError> {
         fs::remove_dir_all(path).map_err(|err| Mp4SourceError::FailedTemporaryDirCleanup(err))
     }
 }
 
-impl Drop for Mp4SourceBuffered {
+impl Drop for Streamed {
     fn drop(&mut self) {
         if let Some(path) = &self.temp_dir_path {
             if let Err(err) = Self::remove_temporary_dir(path) {

@@ -1,6 +1,5 @@
+use crate::image_source::mp4_source::error_codes::Mp4SourceError;
 use image::ImageError;
-
-use crate::image_source::mp4_source::memory_preloaded::error_codes::Mp4SourceError;
 
 #[derive(Debug)]
 pub enum ImageSourceError {
