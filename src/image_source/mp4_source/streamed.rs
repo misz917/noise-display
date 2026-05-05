@@ -57,7 +57,8 @@ impl ImageSource for Streamed {
             memory.push_back((i, full_path.to_owned()));
         }
 
-        let first_image = image::open(&path)?;
+        let first_image_path = &memory[0].1;
+        let first_image = image::open(&first_image_path)?;
         let dimensions = Dimensions {
             width: first_image.width() as usize,
             height: first_image.height() as usize,
@@ -72,7 +73,7 @@ impl ImageSource for Streamed {
     }
 
     fn next(&mut self) -> Option<IndexedImage> {
-        let path = self.image_paths.pop_front();
+        let path = self.image_paths.pop_back();
         if let Some((index, path)) = path {
             let image = image::open(&path).ok()?;
             let indexed_image = IndexedImage::new(index, image);
