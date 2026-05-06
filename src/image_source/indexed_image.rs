@@ -21,7 +21,7 @@ impl IndexedImage {
         if let Some(image) = &self.image {
             return Some(image);
         }
-        return None;
+        None
     }
 
     pub fn image_pop(&mut self) -> Option<DynamicImage> {

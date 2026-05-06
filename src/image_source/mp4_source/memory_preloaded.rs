@@ -51,10 +51,10 @@ impl ImageSource for Mp4SourceBuffered {
 
         let mut memory: LinkedList<IndexedImage> = LinkedList::new();
         let paths = fs::read_dir(&temp_dir_path)
-            .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
+            .map_err(Mp4SourceError::FailedToReadTemporaryDirectory)?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let full_path = &temp_dir_path.join(file_name);
-            let image = image::open(&full_path)?;
+            let image = image::open(full_path)?;
             memory.push_back(IndexedImage::new(i, image));
             print!("\r{}", i);
         }
@@ -100,16 +100,15 @@ impl HasStaticDimensions for Mp4SourceBuffered {
 
 impl Mp4SourceBuffered {
     fn remove_temporary_dir(path: &Path) -> Result<(), Mp4SourceError> {
-        fs::remove_dir_all(path).map_err(|err| Mp4SourceError::FailedTemporaryDirCleanup(err))
+        fs::remove_dir_all(path).map_err(Mp4SourceError::FailedTemporaryDirCleanup)
     }
 }
 
 impl Drop for Mp4SourceBuffered {
     fn drop(&mut self) {
-        if let Some(path) = &self.temp_dir_path {
-            if let Err(err) = Self::remove_temporary_dir(path) {
+        if let Some(path) = &self.temp_dir_path
+            && let Err(err) = Self::remove_temporary_dir(path) {
                 error!("{}", err);
             }
-        }
     }
 }

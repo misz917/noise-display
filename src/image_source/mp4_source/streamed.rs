@@ -51,14 +51,14 @@ impl ImageSource for Streamed {
 
         let mut memory: VecDeque<(usize, PathBuf)> = VecDeque::new();
         let paths = fs::read_dir(&temp_dir_path)
-            .map_err(|err| Mp4SourceError::FailedToReadTemporaryDirectory(err))?;
+            .map_err(Mp4SourceError::FailedToReadTemporaryDirectory)?;
         for (i, file_name) in paths.map(|f| f.unwrap().file_name()).enumerate() {
             let full_path = &temp_dir_path.join(file_name);
             memory.push_back((i, full_path.to_owned()));
         }
 
         let first_image_path = &memory[0].1;
-        let first_image = image::open(&first_image_path)?;
+        let first_image = image::open(first_image_path)?;
         let dimensions = Dimensions {
             width: first_image.width() as usize,
             height: first_image.height() as usize,
@@ -77,9 +77,9 @@ impl ImageSource for Streamed {
         if let Some((index, path)) = path {
             let image = image::open(&path).ok()?;
             let indexed_image = IndexedImage::new(index, image);
-            return Some(indexed_image);
+            Some(indexed_image)
         } else {
-            return None;
+            None
         }
     }
 
@@ -100,16 +100,15 @@ impl HasStaticDimensions for Streamed {
 
 impl Streamed {
     fn remove_temporary_dir(path: &Path) -> Result<(), Mp4SourceError> {
-        fs::remove_dir_all(path).map_err(|err| Mp4SourceError::FailedTemporaryDirCleanup(err))
+        fs::remove_dir_all(path).map_err(Mp4SourceError::FailedTemporaryDirCleanup)
     }
 }
 
 impl Drop for Streamed {
     fn drop(&mut self) {
-        if let Some(path) = &self.temp_dir_path {
-            if let Err(err) = Self::remove_temporary_dir(path) {
+        if let Some(path) = &self.temp_dir_path
+            && let Err(err) = Self::remove_temporary_dir(path) {
                 error!("{}", err);
             }
-        }
     }
 }

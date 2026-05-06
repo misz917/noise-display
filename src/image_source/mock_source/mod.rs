@@ -1,5 +1,6 @@
 use crate::image_source::{HasStaticDimensions, ImageSource};
 
+#[derive(Default)]
 pub struct MockSource;
 
 impl ImageSource for MockSource {
@@ -29,8 +30,3 @@ impl HasStaticDimensions for MockSource {
     }
 }
 
-impl Default for MockSource {
-    fn default() -> Self {
-        Self {}
-    }
-}
